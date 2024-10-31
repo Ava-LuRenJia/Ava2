@@ -1,0 +1,1558 @@
+进入数据段。
+解析变量: 名称=row_address, 类型=DB, 值=1, 地址=2000
+解析变量: 名称=col_address, 类型=DB, 值=0, 地址=2001
+解析变量: 名称=write_data, 类型=DB, 值=55, 地址=2002
+解析变量: 名称=read_data, 值=0, 地址=2003
+退出数据段。
+进入代码段。
+找到 START 标签
+段寄存器已初始化: CS=1000, DS=2000, SS=3000
+Enqueuing instruction: START:
+已入队指令: START:
+Enqueuing instruction: CALL INIT_2164
+已入队指令: CALL INIT_2164
+Enqueuing instruction: CALL WRITE_2164
+已入队指令: CALL WRITE_2164
+Enqueuing instruction: CALL READ_2164
+已入队指令: CALL READ_2164
+Enqueuing instruction: MOV AX, 4C00H
+已入队指令: MOV AX, 4C00H
+Enqueuing instruction: INT 21H
+已入队指令: INT 21H
+找到过程定义: INIT_2164 PROC
+Enqueuing instruction: MOV DX, PORT_RAS
+已入队指令: MOV DX, PORT_RAS
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_CAS
+已入队指令: MOV DX, PORT_CAS
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_WE
+已入队指令: MOV DX, PORT_WE
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: RET
+已入队指令: RET
+找到过程结束: INIT_2164 ENDP
+找到过程定义: WRITE_2164 PROC
+Enqueuing instruction: MOV DX, PORT_RAS
+已入队指令: MOV DX, PORT_RAS
+Enqueuing instruction: MOV AL, 0
+已入队指令: MOV AL, 0
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_ADDRESS
+已入队指令: MOV DX, PORT_ADDRESS
+Enqueuing instruction: MOV AL, row_address
+已入队指令: MOV AL, row_address
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_RAS
+已入队指令: MOV DX, PORT_RAS
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_CAS
+已入队指令: MOV DX, PORT_CAS
+Enqueuing instruction: MOV AL, 0
+已入队指令: MOV AL, 0
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_ADDRESS
+已入队指令: MOV DX, PORT_ADDRESS
+Enqueuing instruction: MOV AL, col_address
+已入队指令: MOV AL, col_address
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_CAS
+已入队指令: MOV DX, PORT_CAS
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_DATA
+已入队指令: MOV DX, PORT_DATA
+Enqueuing instruction: MOV AL, write_data
+已入队指令: MOV AL, write_data
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_WE
+已入队指令: MOV DX, PORT_WE
+Enqueuing instruction: MOV AL, 0
+已入队指令: MOV AL, 0
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: RET
+已入队指令: RET
+找到过程结束: WRITE_2164 ENDP
+找到过程定义: READ_2164 PROC
+Enqueuing instruction: MOV DX, PORT_RAS
+已入队指令: MOV DX, PORT_RAS
+Enqueuing instruction: MOV AL, 0
+已入队指令: MOV AL, 0
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_ADDRESS
+已入队指令: MOV DX, PORT_ADDRESS
+Enqueuing instruction: MOV AL, row_address
+已入队指令: MOV AL, row_address
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_RAS
+已入队指令: MOV DX, PORT_RAS
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_CAS
+已入队指令: MOV DX, PORT_CAS
+Enqueuing instruction: MOV AL, 0
+已入队指令: MOV AL, 0
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_ADDRESS
+已入队指令: MOV DX, PORT_ADDRESS
+Enqueuing instruction: MOV AL, col_address
+已入队指令: MOV AL, col_address
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_CAS
+已入队指令: MOV DX, PORT_CAS
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: MOV DX, PORT_WE
+已入队指令: MOV DX, PORT_WE
+Enqueuing instruction: MOV AL, 1
+已入队指令: MOV AL, 1
+Enqueuing instruction: OUT DX, AL
+已入队指令: OUT DX, AL
+Enqueuing instruction: IN AL, PORT_DATA
+已入队指令: IN AL, PORT_DATA
+Enqueuing instruction: MOV read_data, AL
+已入队指令: MOV read_data, AL
+Enqueuing instruction: RET
+已入队指令: RET
+找到过程结束: READ_2164 ENDP
+退出代码段。
+开始执行指令...
+--------------------------------------------------------
+Dequeued instruction: START:
+开始执行指令...
+--------------------------------------------------------
+Dequeued instruction: CALL INIT_2164
+Error: Stack overflow
+通用寄存器:
+AX: 0x0000  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: CALL WRITE_2164
+Error: Stack overflow
+通用寄存器:
+AX: 0x0000  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: CALL READ_2164
+Error: Stack overflow
+通用寄存器:
+AX: 0x0000  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AX, 4C00H
+处理指令: MOV AX, 4C00H
+MOV 执行完毕: Dest = 0x0004, Src = 0x0004, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: INT 21H
+Error: Stack overflow
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_RAS
+处理指令: MOV DX, PORT_RAS
+未识别的指令: MOV DX, PORT_RAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_CAS
+处理指令: MOV DX, PORT_CAS
+未识别的指令: MOV DX, PORT_CAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_WE
+处理指令: MOV DX, PORT_WE
+未识别的指令: MOV DX, PORT_WE
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0000  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: RET
+POP executed: Value = 0x0000, SP = 0x0002
+RET executed: Returning to address 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_RAS
+处理指令: MOV DX, PORT_RAS
+未识别的指令: MOV DX, PORT_RAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 0
+处理指令: MOV AL, 0
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_ADDRESS
+处理指令: MOV DX, PORT_ADDRESS
+未识别的指令: MOV DX, PORT_ADDRESS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, row_address
+处理指令: MOV AL, row_address
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_RAS
+处理指令: MOV DX, PORT_RAS
+未识别的指令: MOV DX, PORT_RAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_CAS
+处理指令: MOV DX, PORT_CAS
+未识别的指令: MOV DX, PORT_CAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 0
+处理指令: MOV AL, 0
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_ADDRESS
+处理指令: MOV DX, PORT_ADDRESS
+未识别的指令: MOV DX, PORT_ADDRESS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, col_address
+处理指令: MOV AL, col_address
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_CAS
+处理指令: MOV DX, PORT_CAS
+未识别的指令: MOV DX, PORT_CAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_DATA
+处理指令: MOV DX, PORT_DATA
+未识别的指令: MOV DX, PORT_DATA
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, write_data
+处理指令: MOV AL, write_data
+MOV 执行完毕: Dest = 0x0037, Src = 0x0037, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x37  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x37  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_WE
+处理指令: MOV DX, PORT_WE
+未识别的指令: MOV DX, PORT_WE
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x37  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 0
+处理指令: MOV AL, 0
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0002  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: RET
+POP executed: Value = 0x0000, SP = 0x0004
+RET executed: Returning to address 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_RAS
+处理指令: MOV DX, PORT_RAS
+未识别的指令: MOV DX, PORT_RAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 0
+处理指令: MOV AL, 0
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_ADDRESS
+处理指令: MOV DX, PORT_ADDRESS
+未识别的指令: MOV DX, PORT_ADDRESS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, row_address
+处理指令: MOV AL, row_address
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_RAS
+处理指令: MOV DX, PORT_RAS
+未识别的指令: MOV DX, PORT_RAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_CAS
+处理指令: MOV DX, PORT_CAS
+未识别的指令: MOV DX, PORT_CAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 0
+处理指令: MOV AL, 0
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_ADDRESS
+处理指令: MOV DX, PORT_ADDRESS
+未识别的指令: MOV DX, PORT_ADDRESS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, col_address
+处理指令: MOV AL, col_address
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_CAS
+处理指令: MOV DX, PORT_CAS
+未识别的指令: MOV DX, PORT_CAS
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x00  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DX, PORT_WE
+处理指令: MOV DX, PORT_WE
+未识别的指令: MOV DX, PORT_WE
+错误: 未识别的寻址模式。
+MOV 执行完毕: Dest = 0x0000, Src = 0x0000, Mode = 6
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 1
+处理指令: MOV AL, 1
+MOV 执行完毕: Dest = 0x0001, Src = 0x0001, Mode = 0
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OUT DX, AL
+输出到端口 0: 值: 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: IN AL, PORT_DATA
+未识别的指令: IN AL, PORT_DATA
+通用寄存器:
+AX: 0x0004  AL: 0x01  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV read_data, AL
+处理指令: MOV read_data, AL
+MOV 执行完毕: Dest = 0x0004, Src = 0x0000, Mode = 1
+通用寄存器:
+AX: 0x0004  AL: 0x04  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0004  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: RET
+POP executed: Value = 0x0000, SP = 0x0006
+RET executed: Returning to address 0x0000
+通用寄存器:
+AX: 0x0004  AL: 0x04  AH: 0x00
+BX: 0x0000  CX: 0x0000  DX: 0x0000
+堆栈寄存器:
+SP: 0x0006  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+已执行指令: START:
+警告：指令队列为空，无法取出指令
+总共执行了 1 条指令
+
+进程已结束，退出代码为 0

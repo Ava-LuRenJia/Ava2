@@ -1,0 +1,104 @@
+DATA SEGMENT 
+    row_address DB 01H         ; 行地址，设置为 01H
+    col_address DB 0A0H        ; 列地址，设置为 0A0H
+    write_data  DB 55H         ; 要写入的数据，设置为 55H
+    read_data   DB ?           ; 用于存储读取的数据，初始值未定义
+    PORT_RAS    EQU 0x60       ; RAS 引脚的端口地址
+    PORT_CAS    EQU 0x61       ; CAS 引脚的端口地址
+    PORT_WE     EQU 0x62       ; WE 引脚的端口地址
+    PORT_ADDRESS EQU 0x63       ; 地址端口的地址
+    PORT_DATA   EQU 0x64       ; 数据端口的地址
+DATA ENDS
+
+CODE SEGMENT
+START:
+    CALL INIT_2164             ; 初始化 2164 芯片
+    CALL WRITE_2164            ; 执行写入操作
+    CALL READ_2164             ; 执行读取操作
+    MOV AX, 4C00H              ; 退出程序，返回代码 0
+    INT 21H                    ; 调用 DOS 中断，结束程序
+
+INIT_2164 PROC
+    ; 初始化 2164 芯片的引脚状态为高电平
+    MOV DX, PORT_RAS           ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1）
+    OUT DX, AL                 ; 输出到 RAS 引脚
+
+    MOV DX, PORT_CAS           ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1）
+    OUT DX, AL                 ; 输出到 CAS 引脚
+
+    MOV DX, PORT_WE            ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1）
+    OUT DX, AL                 ; 输出到 WE 引脚
+    RET                         ; 返回调用程序
+INIT_2164 ENDP
+
+WRITE_2164 PROC
+    ; 写入数据到指定的行和列地址
+    MOV DX, PORT_RAS           ; 将端口地址加载到 DX
+    MOV AL, 0                  ; 将 AL 设置为低电平（0），激活行地址选通
+    OUT DX, AL                 ; 输出到 RAS 引脚
+    MOV DX, PORT_ADDRESS        ; 将地址端口加载到 DX
+    MOV AL, row_address        ; 将行地址加载到 AL
+    OUT DX, AL                 ; 输出行地址
+    MOV DX, PORT_RAS           ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1），锁存行地址
+    OUT DX, AL                 ; 输出到 RAS 引脚
+
+    MOV DX, PORT_CAS           ; 将端口地址加载到 DX
+    MOV AL, 0                  ; 将 AL 设置为低电平（0），激活列地址选通
+    OUT DX, AL                 ; 输出到 CAS 引脚
+    MOV DX, PORT_ADDRESS        ; 将地址端口加载到 DX
+    MOV AL, col_address        ; 将列地址加载到 AL
+    OUT DX, AL                 ; 输出列地址
+    MOV DX, PORT_CAS           ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1），锁存列地址
+    OUT DX, AL                 ; 输出到 CAS 引脚
+
+    MOV DX, PORT_DATA          ; 将数据端口加载到 DX
+    MOV AL, write_data         ; 将要写入的数据加载到 AL
+    OUT DX, AL                 ; 输出数据到数据端口
+    MOV DX, PORT_WE            ; 将端口地址加载到 DX
+    MOV AL, 0                  ; 将 AL 设置为低电平（0），开始写入操作
+    OUT DX, AL                 ; 输出到 WE 引脚
+    MOV AL, 1                  ; 将 AL 设置为高电平（1），结束写入操作
+    OUT DX, AL                 ; 输出到 WE 引脚
+    RET                         ; 返回调用程序
+WRITE_2164 ENDP
+
+READ_2164 PROC
+    ; 从指定的行和列地址读取数据
+    MOV DX, PORT_RAS           ; 将端口地址加载到 DX
+    MOV AL, 0                  ; 将 AL 设置为低电平（0），激活行地址选通
+    OUT DX, AL                 ; 输出到 RAS 引脚
+    MOV DX, PORT_ADDRESS        ; 将地址端口加载到 DX
+    MOV AL, row_address        ; 将行地址加载到 AL
+    OUT DX, AL                 ; 输出行地址
+    MOV DX, PORT_RAS           ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1），锁存行地址
+    OUT DX, AL                 ; 输出到 RAS 引脚
+
+    MOV DX, PORT_CAS           ; 将端口地址加载到 DX
+    MOV AL, 0                  ; 将 AL 设置为低电平（0），激活列地址选通
+    OUT DX, AL                 ; 输出到 CAS 引脚
+    MOV DX, PORT_ADDRESS        ; 将地址端口加载到 DX
+    MOV AL, col_address        ; 将列地址加载到 AL
+    OUT DX, AL                 ; 输出列地址
+    MOV DX, PORT_CAS           ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1），锁存列地址
+    OUT DX, AL                 ; 输出到 CAS 引脚
+
+    MOV DX, PORT_WE            ; 将端口地址加载到 DX
+    MOV AL, 1                  ; 将 AL 设置为高电平（1），开始读取操作
+    OUT DX, AL                 ; 输出到 WE 引脚
+    IN AL, PORT_DATA           ; 从数据端口读取数据到 AL
+    MOV read_data, AL          ; 将读取到的数据存储到 read_data
+    RET                         ; 返回调用程序
+READ_2164 ENDP
+
+CODE ENDS
+END START
+
+
+

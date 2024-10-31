@@ -1,0 +1,98 @@
+DATA SEGMENT 
+    row_address DB 01H
+    col_address DB 0A0H
+    write_data  DB 55H
+    read_data   DB ?
+    PORT_RAS    EQU 0x60
+    PORT_CAS    EQU 0x61
+    PORT_WE     EQU 0x62
+    PORT_ADDRESS EQU 0x63
+    PORT_DATA   EQU 0x64
+DATA ENDS
+
+CODE SEGMENT
+START:
+    CALL INIT_2164    
+    CALL WRITE_2164   
+    CALL READ_2164    
+    MOV AX, 4C00H      
+    INT 21H            
+
+INIT_2164 PROC
+    MOV DX, PORT_RAS
+    MOV AL, 1          
+    OUT DX, AL
+
+    MOV DX, PORT_CAS
+    MOV AL, 1          
+    OUT DX, AL
+
+    MOV DX, PORT_WE
+    MOV AL, 1          
+    OUT DX, AL
+    RET
+INIT_2164 ENDP
+
+WRITE_2164 PROC
+    MOV DX, PORT_RAS
+    MOV AL, 0          
+    OUT DX, AL
+    MOV DX, PORT_ADDRESS
+    MOV AL, row_address
+    OUT DX, AL         
+    MOV DX, PORT_RAS
+    MOV AL, 1          
+    OUT DX, AL
+
+    MOV DX, PORT_CAS
+    MOV AL, 0          
+    OUT DX, AL
+    MOV DX, PORT_ADDRESS
+    MOV AL, col_address
+    OUT DX, AL         
+    MOV DX, PORT_CAS
+    MOV AL, 1          
+    OUT DX, AL
+
+    MOV DX, PORT_DATA
+    MOV AL, write_data
+    OUT DX, AL         
+    MOV DX, PORT_WE
+    MOV AL, 0          
+    OUT DX, AL
+    MOV AL, 1
+    OUT DX, AL         
+    RET
+WRITE_2164 ENDP
+
+READ_2164 PROC
+    MOV DX, PORT_RAS
+    MOV AL, 0          
+    OUT DX, AL
+    MOV DX, PORT_ADDRESS
+    MOV AL, row_address
+    OUT DX, AL         
+    MOV DX, PORT_RAS
+    MOV AL, 1          
+    OUT DX, AL
+
+    MOV DX, PORT_CAS
+    MOV AL, 0          
+    OUT DX, AL
+    MOV DX, PORT_ADDRESS
+    MOV AL, col_address
+    OUT DX, AL         
+    MOV DX, PORT_CAS
+    MOV AL, 1          
+    OUT DX, AL
+
+    MOV DX, PORT_WE
+    MOV AL, 1          
+    OUT DX, AL
+    IN AL, PORT_DATA
+    MOV read_data, AL  
+    RET
+READ_2164 ENDP
+
+CODE ENDS
+END START
