@@ -9,7 +9,7 @@
 #include "biu.h"
 #include "eu.h"
 
-#define MEMORY_SIZE 256  // ¼ÙÉè 256 x 8 Î»µÄ´æ´¢ÈİÁ¿
+#define MEMORY_SIZE 256  // å‡è®¾ 256 x 8 ä½çš„å­˜å‚¨å®¹é‡
 
 #define RAS_PIN  0
 #define CAS_PIN  1
@@ -25,21 +25,28 @@
 #define A6_PIN 11
 #define A7_PIN 12
 
-#define MEMORY_SIZE 65536 // Ä£Äâ64K´æ´¢ÈİÁ¿
+#define MEMORY_SIZE 65536 // æ¨¡æ‹Ÿ64Kå­˜å‚¨å®¹é‡
 
-// 2164 ´æ´¢Ğ¾Æ¬Àà
+// 2164 å­˜å‚¨èŠ¯ç‰‡ç±»
 typedef struct {
-    uint8_t memory[MEMORY_SIZE]; // Ä£Äâ´æ´¢µ¥Ôª
-    bool pin_states[13];         // Òı½Å×´Ì¬
+    uint8_t memory[MEMORY_SIZE]; // æ¨¡æ‹Ÿå­˜å‚¨å•å…ƒ
+    bool pin_states[13];         // å¼•è„šçŠ¶æ€
 } Memory2164;
 
-// ³õÊ¼»¯ 2164 ´æ´¢Ğ¾Æ¬
+// åˆå§‹åŒ– 2164 å­˜å‚¨èŠ¯ç‰‡
 void initMemory2164(Memory2164 *chip);
 
-// Ğ´ÈëÊı¾İµ½ 2164 ´æ´¢Ğ¾Æ¬
+// å†™å…¥æ•°æ®åˆ° 2164 å­˜å‚¨èŠ¯ç‰‡
 void write_2164(Memory2164 *mem, uint16_t address, uint8_t data);
 
-// ´Ó 2164 ´æ´¢Ğ¾Æ¬¶ÁÈ¡Êı¾İ
+// ä» 2164 å­˜å‚¨èŠ¯ç‰‡è¯»å–æ•°æ®
+uint8_t read_2164(Memory2164 *mem, uint16_t address);
+void set_pin(Memory2164 *chip, uint8_t pin);
+void clear_pin(Memory2164 *chip, uint8_t pin);
+uint8_t read_pin(Memory2164 *chip, uint8_t pin);
+void send_address(Memory2164 *chip, uint8_t address);
+void write_data(Memory2164 *chip, uint8_t data);
+uint8_t read_data(Memory2164 *chip);
 uint8_t read_2164(Memory2164 *mem, uint16_t address);
 
 #endif // CHIP2164_H
