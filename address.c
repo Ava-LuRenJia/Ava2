@@ -8,33 +8,89 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
     char dest[50], src[50];
     uint16_t value;
 
-    // È¥³ı×¢ÊÍ
+    // å»é™¤æ³¨é‡Š
     char *comment = strchr(instruction, ';');
     if (comment) {
         *comment = '\0';
     }
 
-    // È¥³ıÇ°ºóµÄ¿Õ¸ñ
+    // å»é™¤å‰åçš„ç©ºæ ¼
     char *trimmed_instruction = instruction;
     while (*trimmed_instruction == ' ') trimmed_instruction++;
 
-    printf("´¦ÀíÖ¸Áî: %s\n", trimmed_instruction);
+    printf("å¤„ç†æŒ‡ä»¤: %s\n", trimmed_instruction);
 
-    // ¼ì²éÖ¸ÁîÊÇ·ñ°üº¬²Ù×÷Âë
+    // æ£€æŸ¥æŒ‡ä»¤æ˜¯å¦åŒ…å«æ“ä½œç 
     if (strstr(trimmed_instruction, op) != NULL) {
-        // ´¦ÀíÖ¸Áî¸ñÊ½: MOV dest, src
+        // å¤„ç†æŒ‡ä»¤æ ¼å¼: MOV dest, src
         if (sscanf(trimmed_instruction, "%*s %49[^,], %49s", dest, src) == 2) {
-            // È¥³ı src µÄÇ°µ¼¿Õ¸ñ
+            // å»é™¤ src çš„å‰å¯¼ç©ºæ ¼
             char *src_ptr = src;
             while (*src_ptr == ' ') src_ptr++;
-
-            // ´¦Àí¶ÎµØÖ·
-            if (strcmp(src_ptr, "DATA") == 0) {
-                *addr = 0x2000;  // ¼ÙÉè DATA ¶ÎÔÚµØÖ· 0x2000
-                return DIRECT;
+            if (strcmp(src, "DATA") == 0) {
+                return IMMEDIATE; // ç«‹å³æ•°å¯»å€æ¨¡å¼
             }
 
-            // ´¦Àí¼Ä´æÆ÷Ñ°Ö·
+            // å¤„ç†ç›®æ ‡æ˜¯å†…å­˜åœ°å€çš„æƒ…å†µ: MOV [Num1], AL
+            if (strstr(dest, "[") != NULL && strstr(dest, "]") != NULL) {
+                // å¤„ç†ç›®æ ‡æ˜¯å†…å­˜åœ°å€ï¼ˆå³å¸¦ä¸­æ‹¬å·ï¼‰
+                if (sscanf(dest, "[%[^]]]", dest) == 1) {
+                    // æŸ¥æ‰¾å˜é‡å
+                    for (int i = 0; i < var_count; i++) {
+                        if (strcmp(dest, variables[i].name) == 0) {
+                            *addr = variables[i].value.word_value;
+                            return DIRECT; // ç›´æ¥å¯»å€æ¨¡å¼
+                        }
+                    }
+                }
+            }
+
+            // å¤„ç†æºæ˜¯å†…å­˜åœ°å€çš„æƒ…å†µ: MOV AL, [Num1]
+            if (strstr(src_ptr, "[") != NULL && strstr(src_ptr, "]") != NULL) {
+                // å¦‚æœ src æ˜¯å†…å­˜åœ°å€
+                if (sscanf(src_ptr, "[%[^]]]", dest) == 1) {
+                    for (int i = 0; i < var_count; i++) {
+                        if (strcmp(dest, variables[i].name) == 0) {
+                            *addr = variables[i].value.word_value;
+                            return DIRECT; // ç›´æ¥å¯»å€æ¨¡å¼
+                        }
+                    }
+                }
+            }
+
+            // å¤„ç†å¯„å­˜å™¨é—´æ¥å¯»å€ï¼šMOV [BX], AX
+            if (dest[0] == '[' && dest[strlen(dest) - 1] == ']') {
+                char reg_name[10];
+                sscanf(dest, "[%9[^]]]", reg_name);  // è·å–æ‹¬å·å†…çš„å†…å®¹
+                // ç¡®ä¿ BX æ˜¯åœ¨è¿™é‡Œè¯†åˆ«ä¸ºå¯„å­˜å™¨
+                if (strcmp(reg_name, "BX") == 0) {
+                    *addr = cpu->BX;
+                    return INDIRECT;  // å¯„å­˜å™¨é—´æ¥å¯»å€æ¨¡å¼
+                } else if(strcmp(reg_name, "AX") == 0){
+                    *addr = cpu->AX;
+                    return INDIRECT;
+                } else if(strcmp(reg_name, "CX") == 0){
+                    *addr = cpu->CX;
+                    return INDIRECT;
+                } else if(strcmp(reg_name, "DX") == 0){
+                    *addr = cpu->DX;
+                    return INDIRECT;
+                } else if (strcmp(reg_name, "SI") == 0) {
+                    *addr = cpu->SI;
+                    return INDIRECT;
+                } else if (strcmp(reg_name, "DI") == 0) {
+                    *addr = cpu->DI;
+                    return INDIRECT;
+                } else if (strcmp(reg_name, "BP") == 0) {
+                    *addr = cpu->BP;
+                    return INDIRECT;
+                } else {
+                    printf("é”™è¯¯: æœªè¯†åˆ«çš„é—´æ¥å¯»å€å¯„å­˜å™¨ '%s'ã€‚\n", reg_name);
+                    return INVALID;
+                }
+            }
+
+            // å¤„ç†å¯„å­˜å™¨å¯»å€
             if (strcmp(src_ptr, "AX") == 0) {
                 *addr = cpu->AX;
                 return REGISTER;
@@ -60,34 +116,29 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
                 for (int i = 0; i < var_count; i++) {
                     if (strcmp(src_ptr, variables[i].name) == 0) {
                         *addr = variables[i].value.word_value;
-                        return IMMEDIATE; // ½«Æä×÷ÎªÁ¢¼´Êı´¦Àí
+                        return IMMEDIATE; // å°†å…¶ä½œä¸ºç«‹å³æ•°å¤„ç†
                     }
                 }
             }
 
-            // ´¦ÀíÖ±½ÓÑ°Ö·: MOV dest, [Num1]
+            // å¤„ç†ç›´æ¥åœ°å€æ¨¡å¼: MOV dest, [1234h]
             if (sscanf(src_ptr, "[%[^]]]", dest) == 1) {
-                for (int i = 0; i < var_count; i++) {
-                    if (strcmp(dest, variables[i].name) == 0) {
-                        *addr = variables[i].value.word_value;
-                        return DIRECT;
-                    }
+                // æ£€æŸ¥æ˜¯å¦ä¸ºå¯„å­˜å™¨é—´æ¥å¯»å€ï¼ˆä¾‹å¦‚ [BX]ï¼‰
+                if (strcmp(dest, "BX") == 0 || strcmp(dest, "SI") == 0 || strcmp(dest, "DI") == 0 ||
+                    strcmp(dest, "BP") == 0 || strcmp(dest, "CX") == 0 || strcmp(dest, "AX") == 0 ||
+                    strcmp(dest, "DX") == 0) {
+                    // å¯„å­˜å™¨é—´æ¥å¯»å€
+                    *addr = cpu->BX;  // è¿™é‡Œå¯ä»¥æ ¹æ®å¯„å­˜å™¨åŠ¨æ€å†³å®š
+                    return INDIRECT;
                 }
             }
-
-            // ´¦ÀíÖ±½ÓµØÖ·Ä£Ê½: MOV dest, [1234h]
-            if (sscanf(src_ptr, "[%hx]", &value) == 1) {
-                *addr = value;
-                return DIRECT;
-            }
-
-            // ´¦Àí»ùÖ·¼Ó±äÖ·Ä£Ê½: MOV dest, [BX+SI]
+            // å¤„ç†åŸºå€åŠ å˜å€æ¨¡å¼: MOV dest, [BX+SI]
             if (sscanf(src_ptr, "[%[^+]+%hx]", dest, &value) == 2) {
                 *addr = cpu->BX + value;
                 return BASE_INDEX;
             }
 
-            // ´¦ÀíÏà¶ÔÑ°Ö·Ä£Ê½: JMP LABEL
+            // å¤„ç†ç›¸å¯¹å¯»å€æ¨¡å¼: JMP LABEL
             if (strstr(trimmed_instruction, "JMP") != NULL) {
                 char label[50];
                 if (sscanf(trimmed_instruction, "JMP %s", label) == 1) {
@@ -96,13 +147,13 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
                 }
             }
 
-            // ´¦Àí¼Ä´æÆ÷µ½¼Ä´æÆ÷µÄ×ªÒÆ: MOV DS, AX
+            // å¤„ç†å¯„å­˜å™¨åˆ°å¯„å­˜å™¨çš„è½¬ç§»: MOV DS, AX
             if (strcmp(dest, "DS") == 0 && strcmp(src_ptr, "AX") == 0) {
-                cpu->DS = cpu->AX; // ¸üĞÂ DS
+                cpu->DS = cpu->AX; // æ›´æ–° DS
                 return REGISTER;
             }
 
-            // ´¦ÀíÆäËû¼Ä´æÆ÷µ½¼Ä´æÆ÷µÄ×ªÒÆ: MOV AX, BX
+            // å¤„ç†å…¶ä»–å¯„å­˜å™¨åˆ°å¯„å­˜å™¨çš„è½¬ç§»: MOV AX, BX
             if (strcmp(dest, "AX") == 0 && strcmp(src_ptr, "BX") == 0) {
                 cpu->AX = cpu->BX; // AX = BX
                 return REGISTER;
@@ -110,9 +161,10 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
         }
     }
 
-    printf("Î´Ê¶±ğµÄÖ¸Áî: %s\n", trimmed_instruction);
-    return INVALID; // ´¦Àí²»Æ¥ÅäÇé¿ö
+    printf("æœªè¯†åˆ«çš„æŒ‡ä»¤: %s\n", trimmed_instruction);
+    return INVALID; // å¤„ç†ä¸åŒ¹é…æƒ…å†µ
 }
+
 
 
 
