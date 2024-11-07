@@ -8,7 +8,12 @@
 #include "Chip2164.h"
 #define MAX_CODE 256
 
-// ĞŞ¼ô×Ö·û´®Á½¶ËµÄ¿Õ°×
+Variable variables[100];
+int var_count = 0; // å½“å‰å˜é‡çš„æ•°é‡
+
+/**(Variable(*)[100])(variables)ç”¨æ¥æŸ¥è¯¢æ•°ç»„æƒ…å†µ*/
+
+// ä¿®å‰ªå­—ç¬¦ä¸²ä¸¤ç«¯çš„ç©ºç™½
 void trim_whitespace(char *str) {
     char *start = str;
     while (isspace((unsigned char)*start)) {
@@ -23,7 +28,6 @@ void trim_whitespace(char *str) {
     memmove(str, start, strlen(start) + 1);
 }
 
-
 void parse_segment(const char *input, BIU *biu, CPU *cpu, Variable variables[], int *var_count) {
     char line[256];
     int in_data_segment = 0, in_code_segment = 0, found_start = 0;
@@ -35,11 +39,13 @@ void parse_segment(const char *input, BIU *biu, CPU *cpu, Variable variables[], 
         strcpy(line, ptr);
         trim_whitespace(line);
 
+        // è·³è¿‡ç©ºè¡Œæˆ–æ³¨é‡Šè¡Œ
         if (line[0] == ';' || strlen(line) == 0) {
             ptr = strtok(NULL, "\n");
             continue;
         }
 
+        // å»é™¤è¡Œå†…æ³¨é‡Š
         char *comment = strchr(line, ';');
         if (comment != NULL) {
             *comment = '\0';
@@ -47,82 +53,93 @@ void parse_segment(const char *input, BIU *biu, CPU *cpu, Variable variables[], 
 
         trim_whitespace(line);
 
-        // ´¦Àí¶Î¶¨Òå
+        // å¤„ç†æ®µå®šä¹‰
         if (strstr(line, "DATA SEGMENT")) {
             in_data_segment = 1;
-            printf("½øÈëÊı¾İ¶Î¡£\n");
+            printf("è¿›å…¥æ•°æ®æ®µã€‚\n");
         } else if (strstr(line, "DATA ENDS")) {
             in_data_segment = 0;
-            printf("ÍË³öÊı¾İ¶Î¡£\n");
+            printf("é€€å‡ºæ•°æ®æ®µã€‚\n");
         } else if (strstr(line, "CODE SEGMENT")) {
             in_code_segment = 1;
-            printf("½øÈë´úÂë¶Î¡£\n");
+            printf("è¿›å…¥ä»£ç æ®µã€‚\n");
         } else if (strstr(line, "CODE ENDS")) {
             in_code_segment = 0;
-            printf("ÍË³ö´úÂë¶Î¡£\n");
+            printf("é€€å‡ºä»£ç æ®µã€‚\n");
         } else if (strstr(line, "START:")) {
             found_start = 1;
-            printf("ÕÒµ½ START ±êÇ©\n");
+            printf("æ‰¾åˆ° START æ ‡ç­¾\n");
             cpu->CS = CODE_SEGMENT_START;
             cpu->DS = DATA_SEGMENT_START;
             cpu->SS = STACK_SEGMENT_START;
-            printf("¶Î¼Ä´æÆ÷ÒÑ³õÊ¼»¯: CS=%04X, DS=%04X, SS=%04X\n", cpu->CS, cpu->DS, cpu->SS);
-        } else if (strstr(line, "PROC") != NULL) {
-            // ´¦Àí¹ı³Ì¶¨Òå
-            printf("ÕÒµ½¹ı³Ì¶¨Òå: %s\n", line);
-            // ÕâÀï¿ÉÒÔ½«¹ı³ÌÃû³Æ»òÆä±êÊ¶´æ´¢ÔÚÒ»¸öÁĞ±íÖĞ£¬Èç¹ûĞèÒªºóĞø´¦Àí
-            // enqueue_instruction(biu, line);  // Èç¹ûĞèÒª½«¹ı³Ì±ê¼ÇÈë¶Ó
-        } else if (strstr(line, "ENDP") != NULL) {
-            // ´¦Àí¹ı³Ì½áÊø
-            printf("ÕÒµ½¹ı³Ì½áÊø: %s\n", line);
-            // ÕâÀï¿ÉÒÔ½øĞĞÏàÓ¦µÄ´¦Àí£¬±ÈÈç´ÓÁĞ±íÖĞÒÆ³ıµ±Ç°¹ı³Ì
+            printf("æ®µå¯„å­˜å™¨å·²åˆå§‹åŒ–: CS=%04X, DS=%04X, SS=%04X\n", cpu->CS, cpu->DS, cpu->SS);
         }
 
-        // ½âÎöÊı¾İ¶ÎÖĞµÄ±äÁ¿
+        // è§£ææ•°æ®æ®µä¸­çš„å˜é‡
         if (in_data_segment) {
             char var_name[50], var_type[10];
-            int value = 0;
+            int value;
+            char str_value[256];
 
+            // è§£æå•ä¸ªå­—èŠ‚æˆ–å­—å˜é‡
             if (sscanf(line, "%s %s %d", var_name, var_type, &value) == 3) {
-                if (strcmp(var_type, "DB") == 0 || strcmp(var_type, "DW") == 0) {
-                    strcpy(variables[*var_count].name, var_name);
-                    if (strcmp(var_type, "DB") == 0) {
-                        variables[*var_count].value.byte_value = (uint8_t)value;
-                        variables[*var_count].type = 0;
-                    } else {
-                        variables[*var_count].value.word_value = (uint16_t)value;
-                        variables[*var_count].type = 1;
-                    }
-                    printf("½âÎö±äÁ¿: Ãû³Æ=%s, ÀàĞÍ=%s, Öµ=%d, µØÖ·=%04X\n", var_name, var_type, value, DATA_SEGMENT_START + *var_count);
-                    (*var_count)++;
+                strcpy(variables[*var_count].name, var_name);
+                if (strcmp(var_type, "DB") == 0) {
+                    variables[*var_count].value.byte_value = (uint8_t)value;
+                    variables[*var_count].type = 0; // Byte
+                } else if (strcmp(var_type, "DW") == 0) {
+                    variables[*var_count].value.word_value = (uint16_t)value;
+                    variables[*var_count].type = 1; // Word
                 }
-            } else if (strstr(line, "DB") != NULL || strstr(line, "DW") != NULL) {
-                char str_value[256];
-                if (sscanf(line, "%s %*s %[^\n]", var_name, str_value) == 2) {
-                    strcpy(variables[*var_count].name, var_name);
-                    if (strstr(line, "DB") != NULL) {
-                        variables[*var_count].value.byte_value = (uint8_t)atoi(str_value);
-                        variables[*var_count].type = 0;
-                    } else {
-                        variables[*var_count].value.word_value = (uint16_t)atoi(str_value);
-                        variables[*var_count].type = 1;
+                printf("è§£æå˜é‡: åç§°=%s, ç±»å‹=%s, å€¼=%d, åœ°å€=%04X\n", variables[*var_count].name, var_type, variables[*var_count].value.word_value, DATA_SEGMENT_START + *var_count);
+                (*var_count)++;
+            }
+                // å¤„ç†å­—ç¬¦ä¸²æˆ–å¤šä¸ªå­—èŠ‚åˆå§‹åŒ–
+            else if (sscanf(line, "%s %s %[^\n]", var_name, var_type, str_value) == 3) {
+                strcpy(variables[*var_count].name, var_name);
+                int i = 0;
+
+                if (strcmp(var_type, "DB") == 0) {
+                    variables[*var_count].type = 0; // Byte
+
+                    // æ£€æŸ¥æ˜¯å¦ä¸ºå¸¦å¼•å·çš„å­—ç¬¦ä¸²
+                    if (str_value[0] == '\'') {
+                        for (int j = 1; j < strlen(str_value) - 1 && i < 256; j++) {
+                            if (str_value[j] != '\'') {
+                                variables[*var_count].value.byte_array[i++] = (uint8_t)str_value[j];
+                            }
+                        }
+                    } else { // è§£æå¤šä¸ªé€—å·åˆ†éš”çš„æ•°å€¼
+                        char *token = strtok(str_value, ", ");
+                        while (token != NULL && i < 256) {
+                            variables[*var_count].value.byte_array[i++] = (uint8_t)atoi(token);
+                            token = strtok(NULL, ", ");
+                        }
                     }
-                    printf("½âÎö±äÁ¿: Ãû³Æ=%s, Öµ=%d, µØÖ·=%04X\n", var_name,
-                           (variables[*var_count].type == 0) ? variables[*var_count].value.byte_value : variables[*var_count].value.word_value,
-                           DATA_SEGMENT_START + *var_count);
-                    (*var_count)++;
+                    printf("è§£æå˜é‡æ•°ç»„: åç§°=%s, ç±»å‹=DB, å­—èŠ‚æ•°=%d\n", var_name, i);
                 }
+                else if (strcmp(var_type, "DW") == 0) {
+                    variables[*var_count].type = 1; // Word
+
+                    char *token = strtok(str_value, ", ");
+                    while (token != NULL && i < 256) {
+                        variables[*var_count].value.word_array[i++] = (uint16_t)atoi(token);
+                        token = strtok(NULL, ", ");
+                    }
+                    printf("è§£æå˜é‡æ•°ç»„: åç§°=%s, ç±»å‹=DW, å­—æ•°=%d\n", var_name, i);
+                }
+                (*var_count)++;
             }
         }
 
-        // ÔÚ´úÂë¶ÎÖĞÈë¶ÓÖ¸Áî
+        // åœ¨ä»£ç æ®µä¸­å…¥é˜ŸæŒ‡ä»¤
         if (in_code_segment && found_start) {
             if (strlen(line) > 0) {
-                if (!strstr(line, "PROC") && !strstr(line, "ENDP")) {
+                if (!strstr(line, "PROC") && !strstr(line, "ENDP") && !strstr(line, "START:")) {
                     if (enqueue_instruction(biu, line)) {
-                        printf("ÒÑÈë¶ÓÖ¸Áî: %s\n", line);
+                        printf("å·²å…¥é˜ŸæŒ‡ä»¤: %s\n", line);
                     } else {
-                        printf("ÎŞ·¨½«Ö¸ÁîÈë¶Ó: %s\n", line);
+                        printf("æ— æ³•å°†æŒ‡ä»¤å…¥é˜Ÿ: %s\n", line);
                     }
                 }
             }
@@ -135,78 +152,105 @@ void parse_segment(const char *input, BIU *biu, CPU *cpu, Variable variables[], 
 }
 
 
+
 void execute_code(CPU *cpu, BIU *biu, Variable variables[], int var_count) {
     char instruction[50];
-    printf("¿ªÊ¼Ö´ĞĞÖ¸Áî...\n");
+    printf("å¼€å§‹æ‰§è¡ŒæŒ‡ä»¤...\n");
     printf("--------------------------------------------------------\n");
 
     while (!is_queue_empty(biu)) {
         if (dequeue_instruction(biu, instruction)) {
             if (instruction[0] == ';' || strlen(instruction) == 0) {
-                continue; // Ìø¹ı×¢ÊÍ»ò¿ÕÖ¸Áî
+                continue; // è·³è¿‡æ³¨é‡Šæˆ–ç©ºæŒ‡ä»¤
             }
-            uint16_t dest = 0, src = 0;
 
-            // ´¦Àí MOV Ö¸Áî
-            if (strstr(instruction, "MOV") != NULL) {
-                AddressingMode mode = parse_instruction(instruction, "MOV", cpu, &dest, variables, var_count);
-                // Ö´ĞĞ MOV ²Ù×÷
-                mov(cpu, &dest, src, mode, instruction);
-            } else if (strstr(instruction, "LEA") != NULL) {
-                uint16_t addr = 0;
-                AddressingMode mode = parse_instruction(instruction, "LEA", cpu, &addr, variables, var_count);
+            // ä¿ç•™åŸå§‹æŒ‡ä»¤ä»¥ä¾¿åç»­ä½¿ç”¨
+            char original_instruction[50];
+            strcpy(original_instruction, instruction);
+
+            char *instr_name = strtok(instruction, " ");
+            uint16_t dest = 0, src = 0;
+            AddressingMode mode;
+
+            if (strcmp(instr_name, "MOV") == 0) {
+                mode = parse_instruction(original_instruction, "MOV", cpu, &dest, variables, var_count);
+                if (mode != INVALID) {
+                    mov(cpu, &dest, src, mode, original_instruction,variables);
+                } else {
+                    printf("MOVæŒ‡ä»¤è§£æå¤±è´¥: %s\n", original_instruction);
+                }
+
+            } else if (strcmp(instr_name, "LEA") == 0) {
+                mode = parse_instruction(original_instruction, "LEA", cpu, &dest, variables, var_count);
                 if (mode == MEMORY) {
-                    // Èç¹ûÊÇÄÚ´æÑ°Ö·£¬È·±£µØÖ·ÓĞĞ§
-                    addr = find_variable_address(variables, var_count, "Str1");
-                    if (addr != 0) {
-                        cpu->SI = addr;  // ½«½âÎöµ½µÄµØÖ·´æÈë SI ¼Ä´æÆ÷
+                    dest = find_variable_address(variables, var_count, strtok(NULL, " "));
+                    if (dest != 0) {
+                        cpu->SI = dest;  // å°†è§£æåˆ°çš„åœ°å€å­˜å…¥ SI å¯„å­˜å™¨
+                        printf("LEA æ‰§è¡Œï¼Œåœ°å€å­˜å…¥ SI: %u\n", dest);
+                    } else {
+                        printf("LEAæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", original_instruction);
                     }
                 }
-                printf("LEA ½âÎö£¬µØÖ·: %u\n", addr);
-            } else if (strstr(instruction, "PUSH") != NULL) {
-                uint16_t value = (strstr(instruction, "AX") ? cpu->AX : cpu->BX);
-                printf("Ñ¹ÈëÖµ: 0x%04X\n", value);
-                push(cpu, value); // Êµ¼ÊµÄ PUSH Âß¼­
-            } else if (strstr(instruction, "POP") != NULL) {
-                uint16_t value = pop(cpu); // ´ÓÕ»ÖĞµ¯³öÖµ
-                if (strstr(instruction, "AX")) cpu->AX = value;
-                else if (strstr(instruction, "BX")) cpu->BX = value;
-                printf("µ¯³öÖµ: 0x%04X\n", value);
-            } else if (strstr(instruction, "CALL") != NULL) {
-                uint16_t address = 0; // ½âÎöµ÷ÓÃµÄµØÖ·
-                sscanf(instruction, "CALL %hx", &address); // ´ÓÖ¸ÁîÖĞÌáÈ¡µØÖ·
-                call(cpu, address); // µ÷ÓÃ CALL º¯Êı
-            } else if (strstr(instruction, "RET") != NULL) {
-                ret(cpu); // µ÷ÓÃ RET º¯Êı
-            } else if (strstr(instruction, "INT") != NULL) {
-                uint8_t interrupt_number = 0; // ½âÎöÖĞ¶ÏºÅ
-                sscanf(instruction, "INT %hhu", &interrupt_number); // ´ÓÖ¸ÁîÖĞÌáÈ¡ÖĞ¶ÏºÅ
-                interrupt(cpu, interrupt_number); // µ÷ÓÃÖĞ¶Ï´¦Àíº¯Êı
-            } else if (strstr(instruction, "OUT") != NULL) {
-                uint16_t port = 0, value = 0; // ½âÎö¶Ë¿ÚºÍÊä³öÖµ
-                sscanf(instruction, "OUT %hu, %hu", &port, &value); // ´ÓÖ¸ÁîÖĞÌáÈ¡¶Ë¿ÚºÍÊä³öÖµ
-                out(cpu, port, value); // µ÷ÓÃÊä³öº¯Êı
-            } else if (strstr(instruction, "READ") != NULL) {
+
+            } else if (strcmp(instr_name, "PUSH") == 0) {
+                uint16_t value = (strstr(original_instruction, "AX") ? cpu->AX : cpu->BX);
+                printf("å‹å…¥å€¼: 0x%04X\n", value);
+                push(cpu, value);
+
+            } else if (strcmp(instr_name, "POP") == 0) {
+                uint16_t value = pop(cpu);
+                if (strstr(original_instruction, "AX")) cpu->AX = value;
+                else if (strstr(original_instruction, "BX")) cpu->BX = value;
+                printf("å¼¹å‡ºå€¼: 0x%04X\n", value);
+
+            } else if (strcmp(instr_name, "CALL") == 0) {
                 uint16_t address = 0;
-                if (sscanf(instruction, "READ %hu", &address) == 1) {
-                    // Í¨¹ı read_2164 º¯Êı¶ÁÈ¡Êı¾İ
-                    uint8_t data = read_2164(&memory, address);
-                    printf("¶ÁÈ¡Êı¾İ: %02X\n", data);
+                if (sscanf(original_instruction, "CALL %hx", &address) == 1) {
+                    call(cpu, address);
                 } else {
-                    printf("READÖ¸Áî¸ñÊ½´íÎó: %s\n", instruction);
+                    printf("CALLæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", original_instruction);
                 }
-            } else if (strstr(instruction, "WRITE") != NULL) {
+
+            } else if (strcmp(instr_name, "RET") == 0) {
+                ret(cpu);
+
+            } else if (strcmp(instr_name, "INT") == 0) {
+                uint8_t interrupt_number = 0;
+                if (sscanf(original_instruction, "INT %hhu", &interrupt_number) == 1) {
+                    interrupt(cpu, interrupt_number);
+                } else {
+                    printf("INTæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", original_instruction);
+                }
+
+            } else if (strcmp(instr_name, "OUT") == 0) {
+                uint16_t port = 0, value = 0;
+                if (sscanf(original_instruction, "OUT %hu, %hu", &port, &value) == 2) {
+                    out(cpu, port, value);
+                } else {
+                    printf("OUTæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", original_instruction);
+                }
+
+            } else if (strcmp(instr_name, "READ") == 0) {
+                uint16_t address = 0;
+                if (sscanf(original_instruction, "READ %hu", &address) == 1) {
+                    uint8_t data = read_2164(&memory, address);
+                    printf("è¯»å–æ•°æ®: %02X\n", data);
+                } else {
+                    printf("READæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", original_instruction);
+                }
+
+            } else if (strcmp(instr_name, "WRITE") == 0) {
                 uint16_t address = 0;
                 uint8_t data = 0;
-                if (sscanf(instruction, "WRITE %hu %hhu", &address, &data) == 2) {
-                    // Í¨¹ı write_2164 º¯ÊıĞ´ÈëÊı¾İ
+                if (sscanf(original_instruction, "WRITE %hu %hhu", &address, &data) == 2) {
                     write_2164(&memory, address, data);
-                    printf("Ğ´ÈëÊı¾İ: %02X µ½µØÖ· %04X\n", data, address);
+                    printf("å†™å…¥æ•°æ®: %02X åˆ°åœ°å€ %04X\n", data, address);
                 } else {
-                    printf("WRITEÖ¸Áî¸ñÊ½´íÎó: %s\n", instruction);
+                    printf("WRITEæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", original_instruction);
                 }
+
             } else {
-                printf("Î´Ê¶±ğµÄÖ¸Áî: %s\n", instruction);
+                printf("æœªè¯†åˆ«çš„æŒ‡ä»¤: %s\n", original_instruction);
             }
 
             cpu_print_state(cpu);
@@ -214,6 +258,7 @@ void execute_code(CPU *cpu, BIU *biu, Variable variables[], int var_count) {
         }
     }
 }
+
 
 
 
