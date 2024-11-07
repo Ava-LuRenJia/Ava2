@@ -9,19 +9,19 @@
 #define MAX_VARS 100
 #define MAX_CODE 256
 
-// Ѱַ��ʽö��
+// 寻址方式枚举
 typedef enum {
-    IMMEDIATE, // ������Ѱַ
-    REGISTER,  // �Ĵ���Ѱַ
-    DIRECT,    // ֱ��Ѱַ
-    INDIRECT,  // �Ĵ������Ѱַ
-    BASE_INDEX, // ��ַ�ӱ�ַѰַ
-    RELATIVE,  // ���Ѱַ
+    IMMEDIATE, // 立即数寻址
+    REGISTER,  // 寄存器寻址
+    DIRECT,    // 直接寻址
+    INDIRECT,  // 寄存器间接寻址
+    BASE_INDEX, // 基址加变址寻址
+    RELATIVE,  // 相对寻址
     INVALID,
     MEMORY,
 } AddressingMode;
 
-AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, uint16_t *addr, Variable variables[], int var_count);
+parse_instruction(char *instruction, const char *op, CPU *cpu, uint16_t *addr, Variable variables[], int var_count);
 
 
 #endif
