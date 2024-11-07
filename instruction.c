@@ -3,24 +3,24 @@
 #include <stdint.h>
 #include "address.h"
 
-// PUSH Ö¸Áî
+// PUSH æŒ‡ä»¤
 void push(CPU *cpu, uint16_t src) {
-    if (cpu->SP < 2) { // Õ»µÄµ×²¿¼ì²â
+    if (cpu->SP < 2) { // æ ˆçš„åº•éƒ¨æ£€æµ‹
         printf("Error: Stack overflow\n");
         return;
     }
     cpu->SP -= 2;
-    memory[cpu->SP] = (uint8_t)(src & 0xFF); // ´æ´¢µÍ8Î»
-    memory[cpu->SP + 1] = (uint8_t)((src >> 8) & 0xFF); // ´æ´¢¸ß8Î»
+    memory[cpu->SP] = (uint8_t)(src & 0xFF); // å­˜å‚¨ä½8ä½
+    memory[cpu->SP + 1] = (uint8_t)((src >> 8) & 0xFF); // å­˜å‚¨é«˜8ä½
     printf("PUSH executed: Value = 0x%04X, SP = 0x%04X\n", src, cpu->SP);
 }
 
 
-// POP Ö¸Áî
+// POP æŒ‡ä»¤
 uint16_t pop(CPU *cpu) {
     if (cpu->SP > STACK_TOP - 2) {
         printf("Error: Stack underflow\n");
-        return 0; // ·µ»ØÒ»¸öÄ¬ÈÏÖµ
+        return 0; // è¿”å›ä¸€ä¸ªé»˜è®¤å€¼
     }
     uint16_t value = memory[cpu->SP];
     cpu->SP += 2;
@@ -28,7 +28,7 @@ uint16_t pop(CPU *cpu) {
     return value;
 }
 
-// XCHG Ö¸Áî (½»»»¼Ä´æÆ÷»òÄÚ´æÖµ)
+// XCHG æŒ‡ä»¤ (äº¤æ¢å¯„å­˜å™¨æˆ–å†…å­˜å€¼)
 void xchg(uint16_t *dest, uint16_t *src) {
     uint16_t temp = *dest;
     *dest = *src;
@@ -37,289 +37,563 @@ void xchg(uint16_t *dest, uint16_t *src) {
     printf("XCHG executed: Dest = 0x%04X, Src = 0x%04X\n", *dest, *src);
 }
 
-// ADC Ö¸Áî (´ø½øÎ»µÄ¼Ó·¨)
+// ADC æŒ‡ä»¤ (å¸¦è¿›ä½çš„åŠ æ³•)
 void adc(CPU *cpu, uint16_t *dest, uint16_t src) {
-    uint32_t carry = (cpu->FLAGS & FLAG_CF) ? 1 : 0; // ¶ÁÈ¡½øÎ»±êÖ¾
-    uint32_t result = (uint32_t)*dest + (uint32_t)src + carry; // ´ø½øÎ»µÄ¼Ó·¨
-    *dest = (uint16_t)result; // Ö»±£ÁôµÍ 16 Î»
+    uint32_t carry = (cpu->FLAGS & FLAG_CF) ? 1 : 0; // è¯»å–è¿›ä½æ ‡å¿—
+    uint32_t result = (uint32_t)*dest + (uint32_t)src + carry; // å¸¦è¿›ä½çš„åŠ æ³•
+    *dest = (uint16_t)result; // åªä¿ç•™ä½ 16 ä½
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, src, *dest);
 
-    // ´¦Àí½øÎ»±êÖ¾ CF
+    // å¤„ç†è¿›ä½æ ‡å¿— CF
     if (result > 0xFFFF) {
-        cpu->FLAGS |= FLAG_CF; // ÉèÖÃ½øÎ»±êÖ¾
+        cpu->FLAGS |= FLAG_CF; // è®¾ç½®è¿›ä½æ ‡å¿—
     } else {
-        cpu->FLAGS &= ~FLAG_CF; // Çå³ı½øÎ»±êÖ¾
+        cpu->FLAGS &= ~FLAG_CF; // æ¸…é™¤è¿›ä½æ ‡å¿—
     }
 
     printf("ADC executed: Result = 0x%04X, CF = %d\n", *dest, (cpu->FLAGS & FLAG_CF) ? 1 : 0);
 }
 
 
-// SBB Ö¸Áî (´ø½èÎ»µÄ¼õ·¨)
+// SBB æŒ‡ä»¤ (å¸¦å€Ÿä½çš„å‡æ³•)
 void sbb(CPU *cpu, uint16_t *dest, uint16_t src) {
-    uint32_t carry = (cpu->FLAGS & FLAG_CF) ? 1 : 0; // ¶ÁÈ¡½øÎ»±êÖ¾
-    int32_t result = (int32_t)*dest - (int32_t)src - carry; // ´ø½èÎ»µÄ¼õ·¨
+    uint32_t carry = (cpu->FLAGS & FLAG_CF) ? 1 : 0; // è¯»å–è¿›ä½æ ‡å¿—
+    int32_t result = (int32_t)*dest - (int32_t)src - carry; // å¸¦å€Ÿä½çš„å‡æ³•
     *dest = (uint16_t)result;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, -src, *dest);
 
-    // ´¦Àí½èÎ»±êÖ¾ CF
+    // å¤„ç†å€Ÿä½æ ‡å¿— CF
     if (result < 0) {
-        cpu->FLAGS |= FLAG_CF; // ÉèÖÃ½èÎ»±êÖ¾
+        cpu->FLAGS |= FLAG_CF; // è®¾ç½®å€Ÿä½æ ‡å¿—
     } else {
-        cpu->FLAGS &= ~FLAG_CF; // Çå³ı½èÎ»±êÖ¾
+        cpu->FLAGS &= ~FLAG_CF; // æ¸…é™¤å€Ÿä½æ ‡å¿—
     }
 
     printf("SBB executed: Result = 0x%04X, CF = %d\n", *dest, (cpu->FLAGS & FLAG_CF) ? 1 : 0);
 }
 
 
-// INC Ö¸Áî (×ÔÔö)
+// INC æŒ‡ä»¤ (è‡ªå¢)
 void inc(CPU *cpu, uint16_t *value) {
     uint32_t result = (uint32_t)(*value) + 1;
     *value = (uint16_t)result;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, 1, *value);
 
     printf("INC executed: Value = 0x%04X\n", *value);
 }
 
-// DEC Ö¸Áî (×Ô¼õ)
+// DEC æŒ‡ä»¤ (è‡ªå‡)
 void dec(CPU *cpu, uint16_t *value) {
     uint32_t result = (uint32_t)(*value) - 1;
     *value = (uint16_t)result;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, -1, *value);
 
     printf("DEC executed: Value = 0x%04X\n", *value);
 }
 
-// AND Ö¸Áî (Î»Óë)
+// AND æŒ‡ä»¤ (ä½ä¸)
 void and(CPU *cpu, uint16_t *dest, uint16_t src) {
     *dest &= src;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_logical(cpu, *dest);
 
     printf("AND executed: Result = 0x%04X\n", *dest);
 }
 
-// OR Ö¸Áî (Î»»ò)
+// OR æŒ‡ä»¤ (ä½æˆ–)
 void or(CPU *cpu, uint16_t *dest, uint16_t src) {
     *dest |= src;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_logical(cpu, *dest);
 
     printf("OR executed: Result = 0x%04X\n", *dest);
 }
 
-// XOR Ö¸Áî (Î»Òì»ò)
+// XOR æŒ‡ä»¤ (ä½å¼‚æˆ–)
 void xor(CPU *cpu, uint16_t *dest, uint16_t src) {
     *dest ^= src;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_logical(cpu, *dest);
 
     printf("XOR executed: Result = 0x%04X\n", *dest);
 }
 
-// TEST Ö¸Áî (Âß¼­Óë£¬ÓÃÓÚ¸üĞÂ±êÖ¾Î»)
+// TEST æŒ‡ä»¤ (é€»è¾‘ä¸ï¼Œç”¨äºæ›´æ–°æ ‡å¿—ä½)
 void test(CPU *cpu, uint16_t value1, uint16_t value2) {
     uint16_t result = value1 & value2;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_logical(cpu, result);
 
     printf("TEST executed: Result = 0x%04X\n", result);
 }
 
 
-// NOP Ö¸Áî (ÎŞ²Ù×÷)
+// NOP æŒ‡ä»¤ (æ— æ“ä½œ)
 void nop() {
     printf("NOP executed: No operation performed.\n");
 }
 
-// HLT Ö¸Áî (Í£Ö¹Ö´ĞĞ)
+// HLT æŒ‡ä»¤ (åœæ­¢æ‰§è¡Œ)
 void hlt() {
     printf("HLT executed: Halting execution.\n");
-    // ÕâÀï¿ÉÒÔÌí¼Ó´úÂëÀ´Í£Ö¹ CPU Ö´ĞĞ
+    // è¿™é‡Œå¯ä»¥æ·»åŠ ä»£ç æ¥åœæ­¢ CPU æ‰§è¡Œ
 }
 
-// JMP Ö¸Áî (ÎŞÌõ¼şÌø×ª)
+// JMP æŒ‡ä»¤ (æ— æ¡ä»¶è·³è½¬)
 void jmp(CPU *cpu, uint16_t address) {
-    cpu->IP = address; // ¸üĞÂÖ¸ÁîÖ¸Õëµ½ĞÂµÄµØÖ·
+    cpu->IP = address; // æ›´æ–°æŒ‡ä»¤æŒ‡é’ˆåˆ°æ–°çš„åœ°å€
 
     printf("JMP executed: Jumping to address 0x%04X\n", address);
 }
 
-// CALL Ö¸Áî (µ÷ÓÃ×Ó³ÌĞò)
+// CALL æŒ‡ä»¤ (è°ƒç”¨å­ç¨‹åº)
 void call(CPU *cpu, uint16_t address) {
-    if (cpu->SP < 2) { // Õ»µÄµ×²¿¼ì²â
+    if (cpu->SP < 2) { // æ ˆçš„åº•éƒ¨æ£€æµ‹
         printf("Error: Stack overflow\n");
         return;
     }
-    push(cpu, cpu->IP); // ½«µ±Ç°Ö¸ÁîÖ¸ÕëÑ¹ÈëÕ»
-    cpu->IP = address;  // Ìø×ªµ½Ä¿±êµØÖ·
+    push(cpu, cpu->IP); // å°†å½“å‰æŒ‡ä»¤æŒ‡é’ˆå‹å…¥æ ˆ
+    cpu->IP = address;  // è·³è½¬åˆ°ç›®æ ‡åœ°å€
     printf("CALL executed: Jumping to address 0x%04X\n", address);
 }
 
-// RET Ö¸Áî (·µ»Ø×Ó³ÌĞò)
+// RET æŒ‡ä»¤ (è¿”å›å­ç¨‹åº)
 void ret(CPU *cpu) {
-    if (cpu->SP > STACK_TOP - 2) { // È·±£ÓĞ×ã¹»¿Õ¼äµ¯³ö IP
+    if (cpu->SP > STACK_TOP - 2) { // ç¡®ä¿æœ‰è¶³å¤Ÿç©ºé—´å¼¹å‡º IP
         printf("Error: Stack underflow\n");
         return;
     }
-    cpu->IP = pop(cpu); // »Ö¸´ IP
+    cpu->IP = pop(cpu); // æ¢å¤ IP
     printf("RET executed: Returning to address 0x%04X\n", cpu->IP);
 }
 
-// ADD Ö¸Áî (ÎŞ·ûºÅ¼Ó·¨)
+// ADD æŒ‡ä»¤ (æ— ç¬¦å·åŠ æ³•)
 void add(CPU *cpu, uint16_t *dest, uint16_t src) {
     uint32_t result = (uint32_t)*dest + (uint32_t)src;
     *dest = (uint16_t)result;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, src, *dest);
 
-    // ´¦Àí½øÎ»±êÖ¾ CF£¨ÎŞ·ûºÅ¼Ó·¨£©
+    // å¤„ç†è¿›ä½æ ‡å¿— CFï¼ˆæ— ç¬¦å·åŠ æ³•ï¼‰
     if (result > 0xFFFF) {
-        cpu->FLAGS |= FLAG_CF; // ÉèÖÃ½øÎ»±êÖ¾
+        cpu->FLAGS |= FLAG_CF; // è®¾ç½®è¿›ä½æ ‡å¿—
     } else {
-        cpu->FLAGS &= ~FLAG_CF; // Çå³ı½øÎ»±êÖ¾
+        cpu->FLAGS &= ~FLAG_CF; // æ¸…é™¤è¿›ä½æ ‡å¿—
     }
 
     printf("ADD executed: Result = 0x%04X\n", *dest);
 }
 
-// SUB Ö¸Áî (ÎŞ·ûºÅ¼õ·¨)
+// SUB æŒ‡ä»¤ (æ— ç¬¦å·å‡æ³•)
 void sub(CPU *cpu, uint16_t *dest, uint16_t src) {
     uint32_t result = (uint32_t)*dest - (uint32_t)src;
     *dest = (uint16_t)result;
 
-    // ¸üĞÂ±êÖ¾Î»
+    // æ›´æ–°æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, -src, *dest);
 
-    // ´¦Àí½èÎ»±êÖ¾ CF
+    // å¤„ç†å€Ÿä½æ ‡å¿— CF
     if (*dest > src) {
-        cpu->FLAGS |= FLAG_CF; // ÉèÖÃ½èÎ»±êÖ¾
+        cpu->FLAGS |= FLAG_CF; // è®¾ç½®å€Ÿä½æ ‡å¿—
     } else {
-        cpu->FLAGS &= ~FLAG_CF; // Çå³ı½èÎ»±êÖ¾
+        cpu->FLAGS &= ~FLAG_CF; // æ¸…é™¤å€Ÿä½æ ‡å¿—
     }
 
     printf("SUB executed: Result = 0x%04X\n", *dest);
 }
 
 //MOV
-void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char *instruction) {
-    // ½âÎöÔ´²Ù×÷Êı
-    if (sscanf(instruction, "MOV %*s, %hu", &src) != 1) {
-        // Èç¹ûÃ»ÓĞÁ¢¼´Êı£¬Ôò¼ì²é¼Ä´æÆ÷
-        if (strstr(instruction, "AX")) {
-            cpu->AX =*dest;
-        } else if (strstr(instruction, "AL")) {
-            cpu->AL = *dest;
-        } else if (strstr(instruction, "AH")) {
-            cpu->AH = *dest;
-        } else if (strstr(instruction, "BX")) {
-            cpu->BX = *dest;
-        } else if (strstr(instruction, "CX")) {
-            cpu->CX = *dest;
-        } else if (strstr(instruction, "DX")) {
-            cpu->DX = *dest;
-        }
-    }
+void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char *instruction,Variable variables[]) {
+    char instruction_copy[20];
+    char *dest_reg, *src_reg;
+    uint16_t src_value = 0; // ç”¨äºå­˜å‚¨æºå¯„å­˜å™¨æˆ–å†…å­˜çš„å€¼
+    uint16_t *addr = NULL; // æŒ‡å‘ç›®æ ‡åœ°å€çš„æŒ‡é’ˆ
+    char destination_str[50]; // ç›®æ ‡æ“ä½œæ•°
+    char source_str[50];
 
+    // æ‰§è¡Œ MOV æ“ä½œ
     switch (mode) {
-        case IMMEDIATE: // Á¢¼´ÊıÑ°Ö·
-            src = *dest; // ½« src ´æÈëÄ¿±ê
+        case IMMEDIATE: // ç«‹å³æ•°å¯»å€
+        {
+            uint16_t src = 0;
+            if (strcmp(instruction, "MOV AX, DATA") == 0) {
+                src = DATA_SEGMENT_START;  // å¦‚æœæ˜¯ DATAï¼Œèµ‹å€¼ä¸º DATA_SEGMENT_START çš„å€¼
+                cpu->AX = (uint16_t)src;  // å°†ç«‹å³æ•°å­˜å…¥ AX
+                break;
+            }
+            // æ£€æŸ¥æ˜¯å¦æ˜¯æ•°å­—ï¼ˆç«‹å³æ•°ï¼‰
+            if (sscanf(instruction, "MOV %*[^,], %hu", &src) == 1) {
+                // å°†ç«‹å³æ•°å­˜å…¥ç›®æ ‡å¯„å­˜å™¨
+                if (strstr(instruction, "AL")) {
+                    cpu->AX = (cpu->AX & 0xFF00) | (src & 0xFF);  // ä»…æ›´æ–° AX çš„ä½8ä½ (AL)
+                } else if (strstr(instruction, "AH")) {
+                    cpu->AX = (cpu->AX & 0x00FF) | ((src & 0xFF) << 8);  // ä»…æ›´æ–° AX çš„é«˜8ä½ (AH)
+                } else if (strstr(instruction, "AX")) {
+                    cpu->AX = (uint16_t)src;  // å°†ç«‹å³æ•°å­˜å…¥ AX
+                } else if (strstr(instruction, "BX")) {
+                    cpu->BX = (uint16_t)src;  // å°†ç«‹å³æ•°å­˜å…¥ BX
+                } else if (strstr(instruction, "CX")) {
+                    cpu->CX = (uint16_t)src;  // å°†ç«‹å³æ•°å­˜å…¥ CX
+                } else if (strstr(instruction, "DX")) {
+                    cpu->DX = (uint16_t)src;  // å°†ç«‹å³æ•°å­˜å…¥ DX
+                } else {
+                    printf("é”™è¯¯: æ— æ•ˆçš„å¯„å­˜å™¨åç§°ã€‚\n");
+                    return;
+                }
+
+                // æ›´æ–°æ ‡å¿—ä½ï¼ŒåŸºäºAXå¯„å­˜å™¨çš„å€¼æ›´æ–°
+                cpu->ZF = (cpu->AX == 0);  // é›¶æ ‡å¿—ï¼Œæ£€æŸ¥AXæ˜¯å¦ä¸º0
+                cpu->SF = (cpu->AX & 0x8000) != 0;  // ç¬¦å·æ ‡å¿—ï¼Œæ£€æŸ¥AXçš„ç¬¦å·ä½
+            }
+                // å¤„ç†å˜é‡åï¼ˆä¾‹å¦‚ Num2ï¼‰
+            else if (strstr(instruction, "MOV") && strchr(instruction, ',') && sscanf(instruction, "MOV %*[^,], %s", dest) == 1) {
+                for (int i = 0; i < var_count; i++) {
+                    if (strcmp(dest, variables[i].name) == 0) {
+                        // å°†å˜é‡å€¼å­˜å…¥ç›®æ ‡å¯„å­˜å™¨
+                        if (strstr(instruction, "BX")) {
+                            cpu->BX = variables[i].value.word_value;
+                        } else {
+                            printf("é”™è¯¯: æœªè¯†åˆ«çš„å¯„å­˜å™¨åç§°ã€‚\n");
+                            return;
+                        }
+                        break;
+                    }
+                }
+            } else {
+                printf("é”™è¯¯: æ— æ•ˆçš„ç«‹å³æ•°æ ¼å¼ã€‚\n");
+            }
+
+            break;
+        }
+
+
+
+        case REGISTER: // å¯„å­˜å™¨å¯»å€
+            // å¤åˆ¶æŒ‡ä»¤å­—ç¬¦ä¸²ï¼Œä»¥é¿å…ä¿®æ”¹åŸå§‹æŒ‡ä»¤
+            strncpy(instruction_copy, instruction, sizeof(instruction_copy) - 1);
+            instruction_copy[sizeof(instruction_copy) - 1] = '\0';
+
+            // ä½¿ç”¨ strtok åˆ†å‰²æŒ‡ä»¤å­—ç¬¦ä¸²ï¼Œæå–ç›®æ ‡å’Œæºå¯„å­˜å™¨
+            strtok(instruction_copy, " ");          // è·³è¿‡ "MOV"
+            dest_reg = strtok(NULL, ", ");          // è·å–ç›®æ ‡å¯„å­˜å™¨
+            src_reg = strtok(NULL, ", ");           // è·å–æºå¯„å­˜å™¨
+
+            // æ£€æŸ¥æ˜¯å¦æ­£ç¡®æå–äº†å¯„å­˜å™¨
+            if (dest_reg == NULL || src_reg == NULL) {
+                printf("é”™è¯¯: æ— æ•ˆçš„å¯„å­˜å™¨æ ¼å¼ã€‚\n");
+                return;
+            }
+
+            // è·å–æºå¯„å­˜å™¨çš„å€¼
+            if (strcmp(src_reg, "AL") == 0) {
+                src = cpu->AX & 0xFF;  // è·å–AXçš„ä½8ä½
+            } else if (strcmp(src_reg, "AH") == 0) {
+                src = (cpu->AX >> 8) & 0xFF;  // è·å–AXçš„é«˜8ä½
+            } else if (strcmp(src_reg, "AX") == 0) {
+                src = cpu->AX;  // ç›´æ¥è·å–AXå¯„å­˜å™¨çš„å€¼
+            } else if (strcmp(src_reg, "BX") == 0) {
+                src = cpu->BX;
+            } else if (strcmp(src_reg, "CX") == 0) {
+                src = cpu->CX;
+            } else if (strcmp(src_reg, "DX") == 0) {
+                src = cpu->DX;
+            } else {
+                printf("é”™è¯¯: æœªè¯†åˆ«çš„æºå¯„å­˜å™¨ %sã€‚\n", src_reg);
+                return;
+            }
+
+            // å°† src çš„å€¼èµ‹ç»™ç›®æ ‡å¯„å­˜å™¨
+            if (strcmp(dest_reg, "AL") == 0) {
+                cpu->AX = (cpu->AX & 0xFF00) | (src & 0xFF);  // ä¿®æ”¹AXçš„ä½8ä½
+            } else if (strcmp(dest_reg, "AH") == 0) {
+                cpu->AX = (cpu->AX & 0x00FF) | ((src & 0xFF) << 8);  // ä¿®æ”¹AXçš„é«˜8ä½
+            } else if (strcmp(dest_reg, "AX") == 0) {
+                cpu->AX = src;  // ç›´æ¥èµ‹å€¼ç»™AXå¯„å­˜å™¨
+            } else if (strcmp(dest_reg, "BX") == 0) {
+                cpu->BX = src;
+            } else if (strcmp(dest_reg, "CX") == 0) {
+                cpu->CX = src;
+            } else if (strcmp(dest_reg, "DX") == 0) {
+                cpu->DX = src;
+            } else if (strcmp(dest_reg, "DS") == 0) {
+                cpu->DS = src;
+            }else {
+                printf("é”™è¯¯: æœªè¯†åˆ«çš„ç›®æ ‡å¯„å­˜å™¨ %sã€‚\n", dest_reg);
+                return;
+            }
+
+            // æ›´æ–°æ ‡å¿—ä½
+            cpu->ZF = (cpu->AX == 0);  // é›¶æ ‡å¿—ï¼Œæ ¹æ®AXå€¼åˆ¤æ–­
+            cpu->SF = (cpu->AX & 0x8000) != 0;  // ç¬¦å·æ ‡å¿—ï¼Œæ ¹æ®AXå€¼åˆ¤æ–­
             break;
 
-        case REGISTER: // ¼Ä´æÆ÷Ñ°Ö·
-            if (strstr(instruction, "AX")) {
-                cpu->AX =*dest; // ¸üĞÂ AX
-            } else if (strstr(instruction, "AL")) {
-                cpu->AL = *dest; // ¸üĞÂ AL
-            } else if (strstr(instruction, "AH")) {
-                cpu->AH = *dest; // ¸üĞÂ AH
-            } else if (strstr(instruction, "BX")) {
-                cpu->BX = *dest; // ¸üĞÂ BX
-            } else if (strstr(instruction, "CX")) {
-                cpu->CX = *dest; // ¸üĞÂ CX
-            } else if (strstr(instruction, "DX")) {
-                cpu->DX = *dest; // ¸üĞÂ DX
+
+
+        case DIRECT: // ç›´æ¥å¯»å€   äº11æœˆ6æ—¥å¯¹ç«‹å³æ•°å¯»å€å’Œå¯„å­˜å™¨å¯»å€åšäº†è¿›ä¸€æ­¥æ”¹è¿›
+            if (sscanf(instruction, "MOV %49[^,], %49s", destination_str, source_str) == 2) {
+                // å¤„ç†ç›®æ ‡ destinationï¼Œæ£€æŸ¥æ˜¯å¦æ˜¯å†…å­˜åœ°å€
+                if (strstr(destination_str, "[") != NULL && strstr(destination_str, "]") != NULL) {
+                    // ç›®æ ‡æ˜¯å†…å­˜åœ°å€
+                    char var_name[50];
+                    sscanf(destination_str, "[%49[^]]]", var_name); // æå–å˜é‡å
+                    memset(var_name + strlen(var_name), 0, sizeof(var_name) - strlen(var_name)); // æ¸…ç©ºåç»­å­—ç¬¦
+
+                    bool found = false;
+                    for (int i = 0; i < var_count; i++) {
+                        // ç¡®ä¿æ¯”è¾ƒæ—¶å˜é‡åä¸ä¼šæœ‰å¤šä½™çš„å­—ç¬¦
+                        memset(variables[i].name + strlen(variables[i].name), 0, sizeof(variables[i].name) - strlen(variables[i].name));
+                        if (strncmp(var_name, variables[i].name, sizeof(var_name)) == 0) {
+                            addr = &variables[i].value.word_value; // å­˜å‚¨å˜é‡åœ°å€
+                            found = true;
+                            break; // æ‰¾åˆ°åè·³å‡ºå¾ªç¯
+                        }
+                    }
+                    if (!found) {
+                        printf("é”™è¯¯: æœªæ‰¾åˆ°å˜é‡ '%s'\n", var_name);
+                        return; // è¿”å›é”™è¯¯
+                    }
+                } else {
+                    // ç›®æ ‡æ˜¯å¯„å­˜å™¨
+                    if (strcmp(destination_str, "AL") == 0) {
+                        addr = &cpu->AX; // æŒ‡å‘ AL çš„åœ°å€
+                    } else if (strcmp(destination_str, "AX") == 0) {
+                        addr = &cpu->AX; // æŒ‡å‘ AX çš„åœ°å€
+                    } else {
+                        printf("é”™è¯¯: æ— æ•ˆçš„ç›®æ ‡æ“ä½œæ•° '%s'ã€‚\n", destination_str);
+                        return; // è¿”å›é”™è¯¯
+                    }
+                }
+
+                // å¤„ç†æºæ“ä½œæ•°
+                if (strstr(source_str, "[") != NULL && strstr(source_str, "]") != NULL) {
+                    // æºæ“ä½œæ•°æ˜¯å†…å­˜åœ°å€
+                    char var_name[50];
+                    sscanf(source_str, "[%49[^]]]", var_name); // æå–å˜é‡å
+                    memset(var_name + strlen(var_name), 0, sizeof(var_name) - strlen(var_name)); // æ¸…ç©ºåç»­å­—ç¬¦
+
+                    bool found = false;
+                    for (int i = 0; i < var_count; i++) {
+                        // ç¡®ä¿æ¯”è¾ƒæ—¶å˜é‡åä¸ä¼šæœ‰å¤šä½™çš„å­—ç¬¦
+                        memset(variables[i].name + strlen(variables[i].name), 0, sizeof(variables[i].name) - strlen(variables[i].name));
+                        if (strncmp(var_name, variables[i].name, sizeof(var_name)) == 0) {
+                            src_value = variables[i].value.word_value; // è·å–å˜é‡å€¼
+                            found = true;
+                            break; // æ‰¾åˆ°åè·³å‡ºå¾ªç¯
+                        }
+                    }
+                    if (!found) {
+                        printf("é”™è¯¯: æœªæ‰¾åˆ°æºæ“ä½œæ•° '%s'\n", source_str);
+                        return; // è¿”å›é”™è¯¯
+                    }
+                } else {
+                    // æºæ“ä½œæ•°æ˜¯å¯„å­˜å™¨æˆ–ç«‹å³æ•°
+                    if (strcmp(source_str, "AL") == 0) {
+                        src_value = cpu->AX & 0xFF; // è·å– AL çš„å€¼
+                    } else if (strcmp(source_str, "AH") == 0) {
+                        src_value = (cpu->AX >> 8) & 0xFF; // è·å– AH çš„å€¼
+                    } else if (strcmp(source_str, "AX") == 0) {
+                        src_value = cpu->AX; // è·å– AX çš„å€¼
+                    } else {
+                        // ç«‹å³æ•°
+                        if (isdigit(source_str[0]) || (source_str[0] == '-' && isdigit(source_str[1]))) {
+                            src_value = (uint16_t)atoi(source_str); // ç«‹å³æ•°
+                        } else {
+                            bool found = false; // é‡ç½®æ‰¾åˆ°æ ‡å¿—
+                            for (int i = 0; i < var_count; i++) {
+                                if (strcmp(source_str, variables[i].name) == 0) {
+                                    src_value = variables[i].value.word_value; // è·å–å˜é‡å€¼
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                printf("é”™è¯¯: æœªæ‰¾åˆ°æºæ“ä½œæ•° '%s'\n", source_str);
+                                return; // è¿”å›é”™è¯¯
+                            }
+                        }
+                    }
+                }
+
+                // å°† src_value å­˜å…¥æŒ‡å®šçš„å†…å­˜åœ°å€
+                if (addr != NULL) {
+                    *addr = src_value; // ä½¿ç”¨ addr å­˜å‚¨å€¼
+                } else {
+                    printf("é”™è¯¯: addr æœªè¢«åˆå§‹åŒ–ã€‚\n");
+                    return; // è¿”å›é”™è¯¯
+                }
+
+                // æ›´æ–°æ ‡å¿—ä½
+                cpu->ZF = (src_value == 0); // é›¶æ ‡å¿—
+                cpu->SF = (src_value & 0x8000) != 0; // ç¬¦å·æ ‡å¿—
+                cpu->PF = (__builtin_popcount(src_value) % 2) == 0; // å¥‡å¶æ ‡å¿—
+
+                printf("ç›´æ¥å¯»å€: å†™å…¥å†…å­˜[0x%04X] = 0x%04X\n", *addr, src_value);
+            } else {
+                printf("é”™è¯¯: æ— æ³•è§£ææ“ä½œæ•°ã€‚\n");
+                return; // è¿”å›é”™è¯¯
             }
             break;
 
-        case DIRECT: // Ö±½ÓÑ°Ö·
-            memory[*dest] = src; // ½« src ´æÈëÄÚ´æ
+
+        case INDIRECT: // å¯„å­˜å™¨é—´æ¥å¯»å€
+        {
+            char *trimmed_instruction = instruction;
+            while (*trimmed_instruction == ' ') trimmed_instruction++;
+            char dest[50], src[50];
+
+            // è§£ææŒ‡ä»¤ï¼Œè·å–ç›®æ ‡å¯„å­˜å™¨å’Œæºæ“ä½œæ•°
+            if (sscanf(trimmed_instruction, "%*s %49[^,], %49s", dest, src) == 2) {
+                // å»é™¤ src çš„å‰å¯¼ç©ºæ ¼
+                char *src_ptr = src;
+                while (*src_ptr == ' ') src_ptr++;  // è·³è¿‡å‰å¯¼ç©ºæ ¼
+                char temp_src[50];
+                int j = 0;
+                for (int i = 0; src_ptr[i] != '\0'; i++) {
+                    if (src_ptr[i] != '[' && src_ptr[i] != ']') {
+                        temp_src[j++] = src_ptr[i];
+                    }
+                }
+                temp_src[j] = '\0';  // æ·»åŠ å­—ç¬¦ä¸²ç»“æŸç¬¦
+                strcpy(src_ptr, temp_src);  // å°†å¤„ç†åçš„å­—ç¬¦ä¸²æ”¾å› src_ptr
+
+                // è§£æé—´æ¥åœ°å€å¯„å­˜å™¨ï¼ˆä¿ç•™ä¸å˜ï¼‰
+                uint16_t address = 0;
+                if (strcmp(src_ptr, "BX") == 0) {
+                    address = cpu->BX;
+                } else if (strcmp(src_ptr, "AX") == 0) {
+                    address = cpu->AX;
+                } else if (strcmp(src_ptr, "CX") == 0) {
+                    address = cpu->CX;
+                } else if (strcmp(src_ptr, "AL") == 0) {
+                    address = cpu->AX & 0xFF;
+                } else if (strcmp(src_ptr, "AH") == 0) {
+                    address = (cpu->AX >> 8) & 0xFF;
+                } else if (strcmp(src_ptr, "DX") == 0) {
+                    address = cpu->CX;  // ä½¿ç”¨ SI ä½œä¸ºå†…å­˜åœ°å€
+                } else if (strcmp(src_ptr, "SI") == 0) {
+                    address = cpu->SI;  // ä½¿ç”¨ SI ä½œä¸ºå†…å­˜åœ°å€
+                } else if (strcmp(src_ptr, "DI") == 0) {
+                    address = cpu->DI;  // ä½¿ç”¨ DI ä½œä¸ºå†…å­˜åœ°å€
+                } else if (strcmp(src_ptr, "BP") == 0) {
+                    address = cpu->BP;  // ä½¿ç”¨ BP ä½œä¸ºå†…å­˜åœ°å€
+                } else {
+                    printf("é”™è¯¯: æœªè¯†åˆ«çš„æºå¯„å­˜å™¨ '%s'ã€‚\n", src_ptr);
+                    return;
+                }
+
+                // å¤„ç†ç›®æ ‡æ“ä½œæ•°
+                uint8_t dest_value = 0;
+                if (strcmp(dest, "CX") == 0) {
+                    dest_value = cpu->CX;
+                } else if (strcmp(dest, "AX") == 0) {
+                    dest_value = cpu->AX;
+                } else if (strcmp(dest, "BX") == 0) {
+                    dest_value = cpu->BX;
+                } else if (strcmp(dest, "DX") == 0) {
+                    dest_value = cpu->DX;
+                } else {
+                    printf("é”™è¯¯: æœªè¯†åˆ«çš„ç›®æ ‡å¯„å­˜å™¨ '%s'ã€‚\n", dest);
+                    return;
+                }
+
+                // å†™å…¥å†…å­˜åœ°å€
+                memory[address] = dest_value;
+                printf("å¯„å­˜å™¨é—´æ¥å¯»å€: å†™å…¥å†…å­˜[0x%04X] = 0x%02X\n", address, dest_value);
+
+                // æ›´æ–°æ ‡å¿—ä½
+                cpu->ZF = (dest_value == 0); // é›¶æ ‡å¿—
+                cpu->SF = (dest_value & 0x80) != 0; // ç¬¦å·æ ‡å¿—
+                cpu->PF = (__builtin_popcount(dest_value) % 2) == 0; // å¥‡å¶æ ‡å¿—
+            } else {
+                printf("é”™è¯¯: æ— æ•ˆçš„å¯„å­˜å™¨é—´æ¥å¯»å€æ ¼å¼ã€‚\n");
+            }
+        }
             break;
 
-        case INDIRECT: // ¼Ä´æÆ÷¼ä½ÓÑ°Ö·
-            memory[src] = *dest; // ½« src ´æÈëÍ¨¹ı¼Ä´æÆ÷Ñ°Ö·µÄÄÚ´æÎ»ÖÃ
+        case BASE_INDEX: // åŸºå€åŠ å˜å€å¯»å€
+            if (sscanf(instruction, "MOV %*[^,], %hu", &src) != 1) {
+                printf("é”™è¯¯: æ— æ•ˆçš„åŸºå€åŠ å˜å€å¯»å€æ ¼å¼ã€‚\n");
+                return;
+            }
+            // å°† src å­˜å…¥ BX åŸºå€åŠ  SI å˜å€ä½ç½®çš„å†…å­˜
+            memory[cpu->BX + cpu->SI] = src;
+            // æ›´æ–°æ ‡å¿—ä½
+            cpu->ZF = (src == 0); // é›¶æ ‡å¿—
+            cpu->SF = (src & 0x8000) != 0; // ç¬¦å·æ ‡å¿—
             break;
 
-        case BASE_INDEX: // »ùÖ·¼Ó±äÖ·Ñ°Ö·
-            memory[*dest + cpu->SI] = src; // ½« src ´æÈë»ùÖ·¼Ó±äÖ·µÄÄÚ´æ
-            break;
-
-        case RELATIVE: // Ïà¶ÔÑ°Ö·
-            memory[cpu->IP + src] = *dest; // ½« src ´æÈëÏà¶ÔµØÖ·
+        case RELATIVE: // ç›¸å¯¹å¯»å€
+            if (sscanf(instruction, "MOV %*[^,], %hu", &src) != 1) {
+                printf("é”™è¯¯: æ— æ•ˆçš„ç›¸å¯¹å¯»å€æ ¼å¼ã€‚\n");
+                return;
+            }
+            // å°† src å­˜å…¥ç›¸å¯¹ IP åç§»çš„å†…å­˜ä½ç½®
+            memory[cpu->IP + *dest] = src;
+            // æ›´æ–°æ ‡å¿—ä½
+            cpu->ZF = (src == 0); // é›¶æ ‡å¿—
+            cpu->SF = (src & 0x8000) != 0; // ç¬¦å·æ ‡å¿—
             break;
 
         default:
-            printf("´íÎó: Î´Ê¶±ğµÄÑ°Ö·Ä£Ê½¡£\n");
-            break;
+            printf("é”™è¯¯: æœªè¯†åˆ«çš„å¯»å€æ¨¡å¼ã€‚\n");
+            return;
     }
 
-    printf("MOV Ö´ĞĞÍê±Ï: Dest = 0x%04X, Src = 0x%04X, Mode = %d\n", *dest, src, mode);
 }
 
 
 
-// ÎŞ·ûºÅ³Ë·¨ÊµÏÖ
+// æ— ç¬¦å·ä¹˜æ³•å®ç°
 void mul(CPU *cpu, uint16_t src) {
-    // ±£´æµ±Ç° AX µÄÖµ
+    // ä¿å­˜å½“å‰ AX çš„å€¼
     uint32_t result = (uint32_t)cpu->AX * (uint32_t)src;
 
-    // ¼ì²éÊÇ·ñÒç³ö
+    // æ£€æŸ¥æ˜¯å¦æº¢å‡º
     if (result > 0xFFFF) {
-        cpu_set_flag(cpu, FLAG_CF, 1); // ÉèÖÃ½øÎ»±êÖ¾
-        ; // ÉèÖÃ½øÎ»±êÖ¾
-        result &= 0xFFFF; // ±£ÁôµÍ 16 Î»
+        cpu_set_flag(cpu, FLAG_CF, 1); // è®¾ç½®è¿›ä½æ ‡å¿—
+        ; // è®¾ç½®è¿›ä½æ ‡å¿—
+        result &= 0xFFFF; // ä¿ç•™ä½ 16 ä½
     } else {
-        cpu_clear_flag(cpu, FLAG_CF); // Çå³ı½øÎ»±êÖ¾
+        cpu_clear_flag(cpu, FLAG_CF); // æ¸…é™¤è¿›ä½æ ‡å¿—
     }
 
-    cpu->AX = (uint16_t)result; // ½«½á¹û´æ»Ø AX
+    cpu->AX = (uint16_t)result; // å°†ç»“æœå­˜å› AX
 
-    // ¸üĞÂÆäËû±êÖ¾Î»
+    // æ›´æ–°å…¶ä»–æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, src, cpu->AX);
 
     printf("MUL executed: AX = 0x%04X, src = 0x%04X\n", cpu->AX, src);
 }
 
 void imul(CPU *cpu, int16_t src) {
-    // ±£´æµ±Ç° AX µÄÖµ
+    // ä¿å­˜å½“å‰ AX çš„å€¼
     int32_t result = (int32_t)cpu->AX * (int32_t)src;
 
-    // ¼ì²éÊÇ·ñÒç³ö
+    // æ£€æŸ¥æ˜¯å¦æº¢å‡º
     if (result > INT16_MAX || result < INT16_MIN) {
-        cpu_set_flag(cpu, FLAG_OF, 1); // ÉèÖÃÒç³ö±êÖ¾
-        ; // ÉèÖÃÒç³ö±êÖ¾
-        result = result > INT16_MAX ? INT16_MAX : INT16_MIN; // ÏŞÖÆ½á¹ûÔÚÓĞĞ§·¶Î§
+        cpu_set_flag(cpu, FLAG_OF, 1); // è®¾ç½®æº¢å‡ºæ ‡å¿—
+        ; // è®¾ç½®æº¢å‡ºæ ‡å¿—
+        result = result > INT16_MAX ? INT16_MAX : INT16_MIN; // é™åˆ¶ç»“æœåœ¨æœ‰æ•ˆèŒƒå›´
     } else {
-        cpu_clear_flag(cpu, FLAG_OF); // Çå³ıÒç³ö±êÖ¾
+        cpu_clear_flag(cpu, FLAG_OF); // æ¸…é™¤æº¢å‡ºæ ‡å¿—
     }
 
-    cpu->AX = (int16_t)result; // ½«½á¹û´æ»Ø AX
+    cpu->AX = (int16_t)result; // å°†ç»“æœå­˜å› AX
 
-    // ¸üĞÂÆäËû±êÖ¾Î»
+    // æ›´æ–°å…¶ä»–æ ‡å¿—ä½
     cpu_update_flags_arithmetic(cpu, result, src, cpu->AX);
 
     printf("IMUL executed: AX = 0x%04X, src = %d\n", cpu->AX, src);
@@ -327,42 +601,42 @@ void imul(CPU *cpu, int16_t src) {
 
 void Div(CPU *cpu, uint16_t divisor) {
     if (divisor == 0) {
-        // ´¦Àí³ıÒÔÁã´íÎó
+        // å¤„ç†é™¤ä»¥é›¶é”™è¯¯
         printf("Error: Division by zero\n");
         return;
     }
 
-    // ³ı·¨²Ù×÷£º½« AX ³ıÒÔ³ıÊı£¬ÉÌ´æ·ÅÔÚ AX£¬ÓàÊı´æ·ÅÔÚ DX
-    uint32_t dividend = (uint32_t)cpu->AX; // È·±£²»³öÏÖÒç³ö
-    cpu->AX = dividend / divisor; // ÉÌ
-    cpu->DX = dividend % divisor; // ÓàÊı
+    // é™¤æ³•æ“ä½œï¼šå°† AX é™¤ä»¥é™¤æ•°ï¼Œå•†å­˜æ”¾åœ¨ AXï¼Œä½™æ•°å­˜æ”¾åœ¨ DX
+    uint32_t dividend = (uint32_t)cpu->AX; // ç¡®ä¿ä¸å‡ºç°æº¢å‡º
+    cpu->AX = dividend / divisor; // å•†
+    cpu->DX = dividend % divisor; // ä½™æ•°
 }
 
 
 void idiv(CPU *cpu, int16_t divisor) {
     if (divisor == 0) {
-        // ´¦Àí³ıÒÔÁã´íÎó
+        // å¤„ç†é™¤ä»¥é›¶é”™è¯¯
         printf("Error: Division by zero\n");
         return;
     }
 
-    // ¼ÆËãÉÌºÍÓàÊı
-    int32_t dividend = (int32_t)cpu->AX; // È·±£AXÊÇÓĞ·ûºÅµÄ
-    cpu->AX = dividend / divisor; // ÉÌ
-    cpu->DX = dividend % divisor; // ÓàÊı
+    // è®¡ç®—å•†å’Œä½™æ•°
+    int32_t dividend = (int32_t)cpu->AX; // ç¡®ä¿AXæ˜¯æœ‰ç¬¦å·çš„
+    cpu->AX = dividend / divisor; // å•†
+    cpu->DX = dividend % divisor; // ä½™æ•°
 }
 
-// ×Ö·û´®²Ù×÷Ö¸ÁîÊµÏÖ
+// å­—ç¬¦ä¸²æ“ä½œæŒ‡ä»¤å®ç°
 void movsw(CPU *cpu) {
-    uint16_t value = *(uint16_t *)&memory[cpu->SI]; // ´ÓÄÚ´æ¶ÁÈ¡×Ö
-    *(uint16_t *)&memory[cpu->DI] = value;          // Ğ´Èëµ½Ä¿µÄÄÚ´æ
-    cpu->SI += 2;                                   // ¸üĞÂ SI
-    cpu->DI += 2;                                   // ¸üĞÂ DI
+    uint16_t value = *(uint16_t *)&memory[cpu->SI]; // ä»å†…å­˜è¯»å–å­—
+    *(uint16_t *)&memory[cpu->DI] = value;          // å†™å…¥åˆ°ç›®çš„å†…å­˜
+    cpu->SI += 2;                                   // æ›´æ–° SI
+    cpu->DI += 2;                                   // æ›´æ–° DI
 }
 
-// MOVSB Ö¸Áî (×Ö½ÚÒÆ¶¯)
+// MOVSB æŒ‡ä»¤ (å­—èŠ‚ç§»åŠ¨)
 void movsb(CPU *cpu, uint16_t dest, uint16_t src) {
-    memory[dest] = memory[src]; // ½«×Ö½Ú´Ó src ÒÆ¶¯µ½ dest
+    memory[dest] = memory[src]; // å°†å­—èŠ‚ä» src ç§»åŠ¨åˆ° dest
 
     printf("MOVSB executed: Src = 0x%04X, Dest = 0x%04X\n", src, dest);
 }
@@ -372,7 +646,7 @@ void cmpsw(CPU *cpu) {
     uint16_t right = *(uint16_t *)&memory[cpu->DI];
     cpu_set_flag(cpu, FLAG_ZF, left == right);
     cpu_set_flag(cpu, FLAG_CF, left < right);
-    cpu_set_flag(cpu, FLAG_SF, (left - right) >> 15); // ÉèÖÃ·ûºÅ±êÖ¾
+    cpu_set_flag(cpu, FLAG_SF, (left - right) >> 15); // è®¾ç½®ç¬¦å·æ ‡å¿—
 }
 
 void cmpsb(CPU *cpu) {
@@ -380,81 +654,81 @@ void cmpsb(CPU *cpu) {
     uint8_t right = memory[cpu->DI];
     cpu_set_flag(cpu, FLAG_ZF, left == right);
     cpu_set_flag(cpu, FLAG_CF, left < right);
-    cpu_set_flag(cpu, FLAG_SF, (left - right) & 0x80); // ÉèÖÃ·ûºÅ±êÖ¾
+    cpu_set_flag(cpu, FLAG_SF, (left - right) & 0x80); // è®¾ç½®ç¬¦å·æ ‡å¿—
 }
 
 void scasw(CPU *cpu) {
     uint16_t right = *(uint16_t *)&memory[cpu->DI];
     cpu_set_flag(cpu, FLAG_ZF, cpu->AX == right);
     cpu_set_flag(cpu, FLAG_CF, cpu->AX < right);
-    cpu_set_flag(cpu, FLAG_SF, (cpu->AX - right) >> 15); // ÉèÖÃ·ûºÅ±êÖ¾
+    cpu_set_flag(cpu, FLAG_SF, (cpu->AX - right) >> 15); // è®¾ç½®ç¬¦å·æ ‡å¿—
 }
 
 void scasb(CPU *cpu) {
     uint8_t right = memory[cpu->DI];
     cpu_set_flag(cpu, FLAG_ZF, cpu->AL == right);
     cpu_set_flag(cpu, FLAG_CF, cpu->AL < right);
-    cpu_set_flag(cpu, FLAG_SF, (cpu->AL - right) & 0x80); // ÉèÖÃ·ûºÅ±êÖ¾
+    cpu_set_flag(cpu, FLAG_SF, (cpu->AL - right) & 0x80); // è®¾ç½®ç¬¦å·æ ‡å¿—
 }
 
 void lodsw(CPU *cpu) {
-    cpu->AX = *(uint16_t *)&memory[cpu->SI]; // ´ÓÄÚ´æ¼ÓÔØ×Ö
-    cpu->SI += 2;                            // ¸üĞÂ SI
+    cpu->AX = *(uint16_t *)&memory[cpu->SI]; // ä»å†…å­˜åŠ è½½å­—
+    cpu->SI += 2;                            // æ›´æ–° SI
 }
 
 void lodsb(CPU *cpu) {
-    cpu->AL = memory[cpu->SI];              // ´ÓÄÚ´æ¼ÓÔØ×Ö½Ú
-    cpu->SI += 1;                            // ¸üĞÂ SI
+    cpu->AL = memory[cpu->SI];              // ä»å†…å­˜åŠ è½½å­—èŠ‚
+    cpu->SI += 1;                            // æ›´æ–° SI
 }
 
 void stosw(CPU *cpu) {
-    *(uint16_t *)&memory[cpu->DI] = cpu->AX; // ´æ´¢µ½ÄÚ´æ
-    cpu->DI += 2;                            // ¸üĞÂ DI
+    *(uint16_t *)&memory[cpu->DI] = cpu->AX; // å­˜å‚¨åˆ°å†…å­˜
+    cpu->DI += 2;                            // æ›´æ–° DI
 }
 
 void stosb(CPU *cpu) {
-    memory[cpu->DI] = cpu->AL;               // ´æ´¢µ½ÄÚ´æ
-    cpu->DI += 1;                            // ¸üĞÂ DI
+    memory[cpu->DI] = cpu->AL;               // å­˜å‚¨åˆ°å†…å­˜
+    cpu->DI += 1;                            // æ›´æ–° DI
 }
 
-// ´¦ÀíÆ÷¿ØÖÆÀàÖ¸ÁîÊµÏÖ
+// å¤„ç†å™¨æ§åˆ¶ç±»æŒ‡ä»¤å®ç°
 void clc(CPU *cpu) {
-    cpu_clear_flag(cpu, FLAG_CF); // Çå³ı½øÎ»±êÖ¾
+    cpu_clear_flag(cpu, FLAG_CF); // æ¸…é™¤è¿›ä½æ ‡å¿—
 }
 
 void stc(CPU *cpu) {
-    cpu_set_flag(cpu, FLAG_CF, 1); // ÉèÖÃ½øÎ»±êÖ¾
+    cpu_set_flag(cpu, FLAG_CF, 1); // è®¾ç½®è¿›ä½æ ‡å¿—
 }
 
 void cmc(CPU *cpu) {
-    cpu_toggle_flag(cpu, FLAG_CF); // ·´×ª½øÎ»±êÖ¾
+    cpu_toggle_flag(cpu, FLAG_CF); // åè½¬è¿›ä½æ ‡å¿—
 }
 
 void clcd(CPU *cpu) {
-    cpu_clear_flag(cpu, FLAG_DF); // Çå³ı·½Ïò±êÖ¾
+    cpu_clear_flag(cpu, FLAG_DF); // æ¸…é™¤æ–¹å‘æ ‡å¿—
 }
 
 void std(CPU *cpu) {
-    cpu_set_flag(cpu, FLAG_DF, 1); // ÉèÖÃ·½Ïò±êÖ¾
+    cpu_set_flag(cpu, FLAG_DF, 1); // è®¾ç½®æ–¹å‘æ ‡å¿—
 }
 
 void cli(CPU *cpu) {
-    cpu_clear_flag(cpu, FLAG_IF); // Çå³ıÖĞ¶Ï±êÖ¾
+    cpu_clear_flag(cpu, FLAG_IF); // æ¸…é™¤ä¸­æ–­æ ‡å¿—
 }
 
 void sti(CPU *cpu) {
-    cpu_set_flag(cpu, FLAG_IF, 1); // ÉèÖÃÖĞ¶Ï±êÖ¾
+    cpu_set_flag(cpu, FLAG_IF, 1); // è®¾ç½®ä¸­æ–­æ ‡å¿—
 }
 
-// ³ÌĞò¿ØÖÆÀàÖ¸ÁîÊµÏÖ
+// ç¨‹åºæ§åˆ¶ç±»æŒ‡ä»¤å®ç°
 
 void interrupt(CPU *cpu, uint8_t interrupt_number) {
-    if (cpu->SP < 4) { // È·±£ÓĞ×ã¹»µÄ¿Õ¼ä´æ´¢ IP ºÍ FLAGS
+    if (cpu->SP < 4) { // ç¡®ä¿æœ‰è¶³å¤Ÿçš„ç©ºé—´å­˜å‚¨ IP å’Œ FLAGS
         printf("Error: Stack overflow\n");
         return;
     }
-    push(cpu, cpu->IP);    // ±£´æ IP
-    push(cpu, cpu->FLAGS); // ±£´æ±êÖ¾¼Ä´æÆ÷
+    push(cpu, cpu->IP);    // ä¿å­˜ IP
+    push(cpu, cpu->FLAGS); // ä¿å­˜æ ‡å¿—å¯„å­˜å™¨
     uint16_t vector_address = memory[interrupt_number * 4] | (memory[interrupt_number * 4 + 1] << 8);
     cpu->IP = vector_address;
     printf("INT %d executed: Jumping to vector address 0x%04X\n", interrupt_number, vector_address);
@@ -462,44 +736,44 @@ void interrupt(CPU *cpu, uint8_t interrupt_number) {
 
 
 void iret(CPU *cpu) {
-    if (cpu->SP > STACK_TOP - 4) { // È·±£ÓĞ×ã¹»¿Õ¼äµ¯³ö FLAGS ºÍ IP
+    if (cpu->SP > STACK_TOP - 4) { // ç¡®ä¿æœ‰è¶³å¤Ÿç©ºé—´å¼¹å‡º FLAGS å’Œ IP
         printf("Error: Stack underflow\n");
         return;
     }
-    cpu->FLAGS = pop(cpu); // »Ö¸´±êÖ¾¼Ä´æÆ÷
-    cpu->IP = pop(cpu); // »Ö¸´ IP
+    cpu->FLAGS = pop(cpu); // æ¢å¤æ ‡å¿—å¯„å­˜å™¨
+    cpu->IP = pop(cpu); // æ¢å¤ IP
 }
 
 void loop(CPU *cpu) {
     if (cpu->CX != 0) {
-        cpu->CX--; // ¼õÉÙ¼ÆÊı
-        cpu->IP++; // Ìø×ªµ½ÏÂÒ»¸öÖ¸Áî
+        cpu->CX--; // å‡å°‘è®¡æ•°
+        cpu->IP++; // è·³è½¬åˆ°ä¸‹ä¸€ä¸ªæŒ‡ä»¤
     }
 }
 
 void loopz(CPU *cpu) {
     if (cpu->CX != 0 && cpu->ZF) {
-        cpu->CX--; // ¼õÉÙ¼ÆÊı
-        cpu->IP++; // Ìø×ªµ½ÏÂÒ»¸öÖ¸Áî
+        cpu->CX--; // å‡å°‘è®¡æ•°
+        cpu->IP++; // è·³è½¬åˆ°ä¸‹ä¸€ä¸ªæŒ‡ä»¤
     }
 }
 
 void loopnz(CPU *cpu) {
     if (cpu->CX != 0 && !cpu->ZF) {
-        cpu->CX--; // ¼õÉÙ¼ÆÊı
-        cpu->IP++; // Ìø×ªµ½ÏÂÒ»¸öÖ¸Áî
+        cpu->CX--; // å‡å°‘è®¡æ•°
+        cpu->IP++; // è·³è½¬åˆ°ä¸‹ä¸€ä¸ªæŒ‡ä»¤
     }
 }
 
-// LEA Ö¸ÁîµÄÊµÏÖ
+// LEA æŒ‡ä»¤çš„å®ç°
 void lea(CPU *cpu, uint16_t reg, uint16_t addr, AddressingMode mode) {
     uint16_t effective_address;
     switch (mode) {
         case IMMEDIATE:
-            effective_address = addr; // Ö±½ÓÊ¹ÓÃÁ¢¼´Êı
+            effective_address = addr; // ç›´æ¥ä½¿ç”¨ç«‹å³æ•°
             break;
         case REGISTER:
-            // ÕâÀï¼ÙÉèaddrÊÇ¼Ä´æÆ÷±àºÅ£¬Êµ¼ÊĞèÒª´Ó¼Ä´æÆ÷ÖĞ¶ÁÈ¡µØÖ·
+            // è¿™é‡Œå‡è®¾addræ˜¯å¯„å­˜å™¨ç¼–å·ï¼Œå®é™…éœ€è¦ä»å¯„å­˜å™¨ä¸­è¯»å–åœ°å€
             switch (addr) {
                 case 0:
                     effective_address = cpu->AX;
@@ -525,17 +799,17 @@ void lea(CPU *cpu, uint16_t reg, uint16_t addr, AddressingMode mode) {
             }
             break;
         case DIRECT:
-            effective_address = addr; // Ê¹ÓÃÖ±½ÓµØÖ·
+            effective_address = addr; // ä½¿ç”¨ç›´æ¥åœ°å€
             break;
         case INDIRECT:
-            // ¼ÙÉè addr ÊÇ´æ·ÅµØÖ·µÄ¼Ä´æÆ÷
-            effective_address = memory[cpu->BX]; // Ê¹ÓÃ BX ¼Ä´æÆ÷×÷ÎªÖ¸Õë
+            // å‡è®¾ addr æ˜¯å­˜æ”¾åœ°å€çš„å¯„å­˜å™¨
+            effective_address = memory[cpu->BX]; // ä½¿ç”¨ BX å¯„å­˜å™¨ä½œä¸ºæŒ‡é’ˆ
             break;
         case BASE_INDEX:
-            effective_address = cpu->BX + cpu->SI; // »ùÖ· + ±äÖ·
+            effective_address = cpu->BX + cpu->SI; // åŸºå€ + å˜å€
             break;
         case RELATIVE:
-            effective_address = cpu->CS + addr; // Ê¹ÓÃ CS ¼Ä´æÆ÷½øĞĞÏà¶ÔÑ°Ö·
+            effective_address = cpu->CS + addr; // ä½¿ç”¨ CS å¯„å­˜å™¨è¿›è¡Œç›¸å¯¹å¯»å€
             break;
         default:
             printf("Invalid addressing mode specified for LEA.\n");
@@ -545,7 +819,7 @@ void lea(CPU *cpu, uint16_t reg, uint16_t addr, AddressingMode mode) {
 
 
 void out(CPU *cpu, uint16_t port, uint16_t value) {
-    // Êä³öµ½Ö¸¶¨¶Ë¿ÚµÄÂß¼­
-    printf("Êä³öµ½¶Ë¿Ú %u: Öµ: 0x%04X\n", port, value);
-    // Êµ¼ÊµÄÓ²¼ş½»»¥Âß¼­Ó¦ÔÚ´Ë´¦ÊµÏÖ
+    // è¾“å‡ºåˆ°æŒ‡å®šç«¯å£çš„é€»è¾‘
+    printf("è¾“å‡ºåˆ°ç«¯å£ %u: å€¼: 0x%04X\n", port, value);
+    // å®é™…çš„ç¡¬ä»¶äº¤äº’é€»è¾‘åº”åœ¨æ­¤å¤„å®ç°
 }
