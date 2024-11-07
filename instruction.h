@@ -6,7 +6,7 @@
 #include "cpu.h"
 
 
-// ËãÊõÖ¸Áîº¯ÊıÉùÃ÷
+// ç®—æœ¯æŒ‡ä»¤å‡½æ•°å£°æ˜
 void add(CPU *cpu, uint16_t *dest, uint16_t src);
 void sub(CPU *cpu, uint16_t *dest, uint16_t src);
 void mul(CPU *cpu, uint16_t src);
@@ -18,24 +18,24 @@ void dec(CPU *cpu, uint16_t *value);
 void adc(CPU *cpu, uint16_t *dest, uint16_t src);
 void sbb(CPU *cpu, uint16_t *dest, uint16_t src);
 
-// Âß¼­Ö¸Áîº¯ÊıÉùÃ÷
+// é€»è¾‘æŒ‡ä»¤å‡½æ•°å£°æ˜
 void and(CPU *cpu, uint16_t *dest, uint16_t src);
 void or(CPU *cpu, uint16_t *dest, uint16_t src);
 void xor(CPU *cpu, uint16_t *dest, uint16_t src);
 void test(CPU *cpu, uint16_t value1, uint16_t value2);
 
-// Êı¾İ´«ËÍÖ¸Áîº¯ÊıÉùÃ÷
-void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char *instruction);
+// æ•°æ®ä¼ é€æŒ‡ä»¤å‡½æ•°å£°æ˜
+void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char *instruction,Variable variables[]);
 void xchg(uint16_t *dest, uint16_t *src);
 void push(CPU *cpu, uint16_t src);
 uint16_t pop(CPU *cpu);
 
-// ¿ØÖÆÁ÷Ö¸Áîº¯ÊıÉùÃ÷
+// æ§åˆ¶æµæŒ‡ä»¤å‡½æ•°å£°æ˜
 void jmp(CPU *cpu, uint16_t address);
 void call(CPU *cpu, uint16_t address);
 void ret(CPU *cpu);
 
-// ×Ö·û´®²Ù×÷Ö¸ÁîÊµÏÖ
+// å­—ç¬¦ä¸²æ“ä½œæŒ‡ä»¤å®ç°
 void movsw(CPU *cpu);
 void movsb(CPU *cpu, uint16_t dest, uint16_t src);
 void cmpsw(CPU *cpu);
@@ -48,7 +48,7 @@ void stosw(CPU *cpu);
 void stosb(CPU *cpu);
 void lea(CPU *cpu, uint16_t reg, uint16_t addr, AddressingMode mode);
 
-// ´¦ÀíÆ÷¿ØÖÆÀàÖ¸ÁîÊµÏÖ
+// å¤„ç†å™¨æ§åˆ¶ç±»æŒ‡ä»¤å®ç°
 void nop();
 void hlt();
 void clc(CPU *cpu);
@@ -59,7 +59,7 @@ void std(CPU *cpu);
 void cli(CPU *cpu);
 void sti(CPU *cpu);
 
-// ³ÌĞò¿ØÖÆÀàÖ¸ÁîÊµÏÖ
+// ç¨‹åºæ§åˆ¶ç±»æŒ‡ä»¤å®ç°
 void interrupt(CPU *cpu, uint8_t interrupt_number);
 void iret(CPU *cpu);
 void loop(CPU *cpu);
