@@ -10,30 +10,42 @@
 #define MAX_VARS 100
 #define MAX_CODE 256
 #define MAX_INPUT_SIZE 1024
-#define QUEUE_SIZE 256 // ÉèÖÃ¶ÓÁĞ´óĞ¡
-#define CODE_SEGMENT_START 0x1000 // Ê¾ÀıµØÖ·
-#define DATA_SEGMENT_START 0x2000 // Ê¾ÀıµØÖ·
-#define STACK_SEGMENT_START 0x3000 // Ê¾ÀıµØÖ·
+#define QUEUE_SIZE 256 // è®¾ç½®é˜Ÿåˆ—å¤§å°
+#define CODE_SEGMENT_START 0x1000 // ç¤ºä¾‹åœ°å€
+#define DATA_SEGMENT_START 0x2000 // ç¤ºä¾‹åœ°å€
+#define STACK_SEGMENT_START 0x3000 // ç¤ºä¾‹åœ°å€
 #define DATA DATA_SEGMENT_START
 
+
 typedef struct {
-    char name[50];       // ±äÁ¿Ãû³Æ
-    uint16_t address;    // ±äÁ¿µÄÄÚ´æµØÖ·
-    uint8_t type;        // ±äÁ¿ÀàĞÍ£º0±íÊ¾×Ö½Ú£¨DB£©£¬1±íÊ¾×Ö£¨DW£©
+    char name[50];               // å˜é‡åç§°
+    int type;                    // 0 = byte (DB), 1 = word (DW)
+    uint16_t address;            // å˜é‡çš„å†…å­˜åœ°å€
     union {
-        uint8_t byte_value;   // ´æ´¢×Ö½ÚÀàĞÍ±äÁ¿£¨DB£©
-        uint16_t word_value;  // ´æ´¢×ÖÀàĞÍ±äÁ¿£¨DW£©
+        uint8_t byte_value;      // å•å­—èŠ‚å€¼ (DB)
+        uint16_t word_value;     // åŒå­—èŠ‚å€¼ (DW)
+        uint8_t byte_array[256]; // å­—èŠ‚æ•°ç»„ (æ”¯æŒ DB åˆå§‹åŒ–çš„å¤šä¸ªå­—èŠ‚)
+        uint16_t word_array[256];// å­—æ•°ç»„ (æ”¯æŒ DW åˆå§‹åŒ–çš„å¤šä¸ªå­—)
     } value;
 } Variable;
 
 
-extern Variable variables[MAX_VARS]; // Ê¹ÓÃ extern ÉùÃ÷
-
-extern uint8_t memory[MEMORY_SIZE]; // ÉùÃ÷ memory ÎªÍâ²¿±äÁ¿
-
-// BIUµÄÖ¸Áî¶ÓÁĞ½á¹¹
 typedef struct {
-    char instruction_queue[QUEUE_SIZE][50]; // Ã¿¸öÖ¸Áî×î´ó³¤¶ÈÎª50×Ö·û
+    const char *label;   // æ ‡ç­¾åç§°
+    uint16_t address;    // æ ‡ç­¾å¯¹åº”çš„åœ°å€
+} LabelAddress;
+
+
+
+extern int var_count;
+
+extern Variable variables[MAX_VARS]; // ä½¿ç”¨ extern å£°æ˜
+
+extern uint8_t memory[MEMORY_SIZE]; // å£°æ˜ memory ä¸ºå¤–éƒ¨å˜é‡
+
+// BIUçš„æŒ‡ä»¤é˜Ÿåˆ—ç»“æ„
+typedef struct {
+    char instruction_queue[QUEUE_SIZE][50]; // æ¯ä¸ªæŒ‡ä»¤æœ€å¤§é•¿åº¦ä¸º50å­—ç¬¦
     int front;
     int rear;
 } BIU;
@@ -45,6 +57,7 @@ bool enqueue_instruction(BIU *biu, const char *instruction);
 bool dequeue_instruction(BIU *biu, char *instruction);
 uint16_t find_variable_address(Variable variables[], int var_count, const char *var_name);
 #endif // BIU_H
+
 
 
 
