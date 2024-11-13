@@ -14,7 +14,6 @@ add_executable(Weiji main.c
         biu.h
         eu.c
         eu.h
-        test5.c
         test5.h
         Chip2164.c
         Chip2164.h)
