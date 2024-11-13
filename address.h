@@ -21,7 +21,7 @@ typedef enum {
     MEMORY,
 } AddressingMode;
 
-parse_instruction(char *instruction, const char *op, CPU *cpu, uint16_t *addr, Variable variables[], int var_count);
+AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, uint16_t *addr, Variable variables[], int var_count);
 
 
 #endif
