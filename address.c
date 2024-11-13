@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, uint16_t *addr, Variable variables[], int var_count) {
     char dest[50], src[50];
     uint16_t value;
@@ -27,8 +26,63 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
             // 去除 src 的前导空格
             char *src_ptr = src;
             while (*src_ptr == ' ') src_ptr++;
-            if (strcmp(src, "DATA") == 0) {
-                return IMMEDIATE; // 立即数寻址模式
+
+            // 处理 LEA 指令: LEA SI, Str1
+            if (strstr(trimmed_instruction, "LEA") != NULL) {
+                char *token = strtok(trimmed_instruction, " ,");
+                if (token != NULL && strcmp(token, "LEA") == 0) {
+                    // 找到 LEA 指令
+                    token = strtok(NULL, " ,"); // 获取目标寄存器
+                    char *dest = token;
+                    token = strtok(NULL, " ,"); // 获取源操作数
+                    char *src = token;
+                    // 如果成功解析了 LEA 指令和两个操作数
+                    printf("LEA 指令: dest=%s, src=%s\n", dest, src);
+                    if (strcmp(dest, "SI") == 0) {
+                        // 处理 LEA SI, Str1
+                        for (int i = 0; i < var_count; i++) {
+                            if (strcmp(src, variables[i].name) == 0) {
+                                *addr = variables[i].value.word_value;
+                                return DIRECT; // 直接寻址模式
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            // 处理 MOV 指令：MOV SI, OFFSET Str1
+            if (strstr(instruction, "MOV") != NULL && strstr(instruction, "OFFSET") != NULL) {
+                // 直接返回 DIRECT 寻址模式
+                return DIRECT;
+            }
+
+            // 处理 MOV 指令：MOV [Num1], AL 或 MOV AL, [Num1]
+            if (strchr(dest, '[') != NULL && strchr(dest, ']') != NULL) {
+                // dest 是内存地址
+                if (sscanf(dest, "[%[^]]]", dest) == 1) {
+                    // 查找变量名
+                    for (int i = 0; i < var_count; i++) {
+                        if (strcmp(dest, variables[i].name) == 0) {
+                            *addr = variables[i].value.word_value;
+                            return DIRECT; // 直接寻址模式
+                        }
+                    }
+                }
+            }
+
+            // 处理 MOV 指令：MOV [Num1], AL 或 MOV AL, [Num1]
+            if (strchr(dest, '[') != NULL && strchr(dest, ']') != NULL) {
+                // dest 是内存地址
+                if (sscanf(dest, "[%[^]]]", dest) == 1) {
+                    // 查找变量名
+                    for (int i = 0; i < var_count; i++) {
+                        if (strcmp(dest, variables[i].name) == 0) {
+                            *addr = variables[i].value.word_value;
+                            return DIRECT; // 直接寻址模式
+                        }
+                    }
+                }
             }
 
             // 处理目标是内存地址的情况: MOV [Num1], AL
@@ -66,13 +120,13 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
                 if (strcmp(reg_name, "BX") == 0) {
                     *addr = cpu->BX;
                     return INDIRECT;  // 寄存器间接寻址模式
-                } else if(strcmp(reg_name, "AX") == 0){
+                } else if (strcmp(reg_name, "AX") == 0) {
                     *addr = cpu->AX;
                     return INDIRECT;
-                } else if(strcmp(reg_name, "CX") == 0){
+                } else if (strcmp(reg_name, "CX") == 0) {
                     *addr = cpu->CX;
                     return INDIRECT;
-                } else if(strcmp(reg_name, "DX") == 0){
+                } else if (strcmp(reg_name, "DX") == 0) {
                     *addr = cpu->DX;
                     return INDIRECT;
                 } else if (strcmp(reg_name, "SI") == 0) {
@@ -110,7 +164,7 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
                 *addr = (cpu->AX >> 8) & 0xFF;
                 return REGISTER;
             } else if (isdigit(src_ptr[0]) || (src_ptr[0] == '-' && isdigit(src_ptr[1]))) {
-                *addr = (uint16_t)atoi(src_ptr);
+                *addr = (uint16_t) atoi(src_ptr);
                 return IMMEDIATE;
             } else {
                 for (int i = 0; i < var_count; i++) {
@@ -132,38 +186,49 @@ AddressingMode parse_instruction(char *instruction, const char *op, CPU *cpu, ui
                     return INDIRECT;
                 }
             }
+
             // 处理基址加变址模式: MOV dest, [BX+SI]
             if (sscanf(src_ptr, "[%[^+]+%hx]", dest, &value) == 2) {
-                *addr = cpu->BX + value;
-                return BASE_INDEX;
-            }
-
-            // 处理相对寻址模式: JMP LABEL
-            if (strstr(trimmed_instruction, "JMP") != NULL) {
-                char label[50];
-                if (sscanf(trimmed_instruction, "JMP %s", label) == 1) {
-                    *addr = atoi(label);
-                    return RELATIVE;
+                // 如果是基址加变址模式，例如 [BX+SI]
+                if (strcmp(dest, "BX") == 0) {
+                    *addr = cpu->BX + value;
+                    return BASE_INDEX;
+                } else if (strcmp(dest, "SI") == 0) {
+                    *addr = cpu->SI + value;
+                    return BASE_INDEX;
+                } else if (strcmp(dest, "DI") == 0) {
+                    *addr = cpu->DI + value;
+                    return BASE_INDEX;
+                } else if (strcmp(dest, "BP") == 0) {
+                    *addr = cpu->BP + value;
+                    return BASE_INDEX;
+                } else {
+                    // 如果目标是其他寄存器（如 BX+SI），需要检查并解析
+                    // 这里我们假设寄存器组合会是类似 "[BX+SI]" 或者 "[SI+BX]" 的格式
+                    char reg1[10], reg2[10];
+                    if (sscanf(src_ptr, "[%[^+]+%[^]]]", reg1, reg2) == 2) {
+                        uint16_t reg1_value = 0, reg2_value = 0;
+                        if (strcmp(reg1, "BX") == 0) {
+                            reg1_value = cpu->BX;
+                        } else if (strcmp(reg1, "SI") == 0) {
+                            reg1_value = cpu->SI;
+                        }
+                        if (strcmp(reg2, "SI") == 0) {
+                            reg2_value = cpu->SI;
+                        } else if (strcmp(reg2, "BX") == 0) {
+                            reg2_value = cpu->BX;
+                        }
+                        *addr = reg1_value + reg2_value;
+                        return BASE_INDEX;
+                    }
                 }
-            }
-
-            // 处理寄存器到寄存器的转移: MOV DS, AX
-            if (strcmp(dest, "DS") == 0 && strcmp(src_ptr, "AX") == 0) {
-                cpu->DS = cpu->AX; // 更新 DS
-                return REGISTER;
-            }
-
-            // 处理其他寄存器到寄存器的转移: MOV AX, BX
-            if (strcmp(dest, "AX") == 0 && strcmp(src_ptr, "BX") == 0) {
-                cpu->AX = cpu->BX; // AX = BX
-                return REGISTER;
             }
         }
     }
 
-    printf("未识别的指令: %s\n", trimmed_instruction);
-    return INVALID; // 处理不匹配情况
+    return INVALID;
 }
+
 
 
 
