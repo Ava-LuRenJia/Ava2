@@ -1,0 +1,51 @@
+DATA SEGMENT
+    Num1 DB 5
+    Num2 DW 10
+    Str1 DB 'Hello, ', 0
+    Str2 DB 'World!', 0
+DATA ENDS
+
+STACK SEGMENT STACK
+   STACK DW 128 DUP(0)
+STACK ENDS
+
+; 定义代码段
+
+CODE SEGMENT
+
+    ASSUME CS:CODE, DS:DATA, SS:STACK
+
+START:
+    MOV AX, DATA
+    MOV DS, AX
+    MOV AL, 15
+    MOV [Num1], AL
+    MOV BX, Num2
+    MOV CX, [BX]
+    LEA SI, Str1
+    PUSH CX
+    POP DX
+
+    ADD AL, 3
+    SUB AL, 2
+    AND AL, 0Fh
+    OR AL, 01h
+    XOR AL, 02h
+    NOT AL
+
+    MOV SI, OFFSETStr1
+    MOV DI, OFFSETStr2
+    MOVSB
+    INC SI
+    INC DI
+    CMPSB
+
+    STC
+    CLC
+
+    JMP START
+
+    MOV AH, 4Ch
+    INT 21h
+CODE ENDS
+END START
