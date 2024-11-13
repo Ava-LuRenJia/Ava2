@@ -2,66 +2,67 @@
 #include <string.h>
 #include "biu.h"
 
-uint8_t memory[1024 * 1024]; // Êµ¼Ê¶¨Òå memory
+uint8_t memory[1024 * 1024]; // å®é™…å®šä¹‰ memory
 
-// ³õÊ¼»¯BIU
+// åˆå§‹åŒ–BIU
 void init_biu(BIU *biu) {
     biu->front = 0;
     biu->rear = 0;
-    memset(memory, 0, sizeof(memory)); // ³õÊ¼»¯ÄÚ´æ
+    memset(memory, 0, sizeof(memory)); // åˆå§‹åŒ–å†…å­˜
 }
 
-// ¼ì²é¶ÓÁĞÊÇ·ñÒÑÂú£¬Í¨¹ı¼ÆËã rear + 1 Óë front µÄÄ£ÖµÀ´ÅĞ¶Ï
+// æ£€æŸ¥é˜Ÿåˆ—æ˜¯å¦å·²æ»¡ï¼Œé€šè¿‡è®¡ç®— rear + 1 ä¸ front çš„æ¨¡å€¼æ¥åˆ¤æ–­
 bool is_queue_full(BIU *biu) {
     return ((biu->rear + 1) % QUEUE_SIZE == biu->front);
 }
 
-// ¼ì²é¶ÓÁĞÊÇ·ñÎª¿Õ
+// æ£€æŸ¥é˜Ÿåˆ—æ˜¯å¦ä¸ºç©º
 bool is_queue_empty(BIU *biu) {
     return (biu->front == biu->rear);
 }
 
-// ÏòBIU¶ÓÁĞÖĞ¼ÓÈëÖ¸Áî
+// å‘BIUé˜Ÿåˆ—ä¸­åŠ å…¥æŒ‡ä»¤
 bool enqueue_instruction(BIU *biu, const char *instruction) {
     if (is_queue_full(biu)) {
-        printf("¾¯¸æ£ºÖ¸Áî¶ÓÁĞÒÑÂú£¬µ±Ç°ÈİÁ¿: %d£¬Ç°Ö¸Õë: %d£¬ºóÖ¸Õë: %d\n", QUEUE_SIZE, biu->front, biu->rear);
+        printf("è­¦å‘Šï¼šæŒ‡ä»¤é˜Ÿåˆ—å·²æ»¡ï¼Œå½“å‰å®¹é‡: %dï¼Œå‰æŒ‡é’ˆ: %dï¼ŒåæŒ‡é’ˆ: %d\n", QUEUE_SIZE, biu->front, biu->rear);
         return false;
     }
 
-    // È·±£Ö¸Áî³¤¶È²»³¬¹ı¶ÓÁĞÖĞµÄ×î´ó³¤¶È
+    // ç¡®ä¿æŒ‡ä»¤é•¿åº¦ä¸è¶…è¿‡é˜Ÿåˆ—ä¸­çš„æœ€å¤§é•¿åº¦
     if (strlen(instruction) >= 50) {
-        printf("´íÎó£ºÖ¸Áî¹ı³¤£¬ÎŞ·¨¼ÓÈë¶ÓÁĞ\n");
+        printf("é”™è¯¯ï¼šæŒ‡ä»¤è¿‡é•¿ï¼Œæ— æ³•åŠ å…¥é˜Ÿåˆ—\n");
         return false;
     }
 
-    // ÔÊĞíÖØ¸´Ö¸ÁîÖ±½Ó¼ÓÈë¶ÓÁĞ£¬Ê¹ÓÃ strcpy ½«Ö¸Áî¸´ÖÆµ½¶ÓÁĞµÄµ±Ç°Î»ÖÃ£¬È»ºó¸üĞÂ rear Ö¸Õë£¬ÒÆ¶¯µ½ÏÂÒ»¸öÎ»ÖÃ
-    printf("Enqueuing instruction: %s\n", instruction); // Ìí¼Óµ÷ÊÔĞÅÏ¢
+    // å…è®¸é‡å¤æŒ‡ä»¤ç›´æ¥åŠ å…¥é˜Ÿåˆ—ï¼Œä½¿ç”¨ strcpy å°†æŒ‡ä»¤å¤åˆ¶åˆ°é˜Ÿåˆ—çš„å½“å‰ä½ç½®ï¼Œç„¶åæ›´æ–° rear æŒ‡é’ˆï¼Œç§»åŠ¨åˆ°ä¸‹ä¸€ä¸ªä½ç½®
+    printf("Enqueuing instruction: %s\n", instruction); // æ·»åŠ è°ƒè¯•ä¿¡æ¯
     strcpy(biu->instruction_queue[biu->rear], instruction);
     biu->rear = (biu->rear + 1) % QUEUE_SIZE;
     return true;
 }
 
-// ´ÓBIU¶ÓÁĞÖĞÈ¡³öÖ¸Áî
+// ä»BIUé˜Ÿåˆ—ä¸­å–å‡ºæŒ‡ä»¤
 bool dequeue_instruction(BIU *biu, char *instruction) {
     if (is_queue_empty(biu)) {
-        printf("¾¯¸æ£ºÖ¸Áî¶ÓÁĞÎª¿Õ£¬ÎŞ·¨È¡³öÖ¸Áî\n");
+        printf("è­¦å‘Šï¼šæŒ‡ä»¤é˜Ÿåˆ—ä¸ºç©ºï¼Œæ— æ³•å–å‡ºæŒ‡ä»¤\n");
         return false;
     }
     strcpy(instruction, biu->instruction_queue[biu->front]);
     biu->front = (biu->front + 1) % QUEUE_SIZE;
-    printf("Dequeued instruction: %s\n", instruction); // Ìí¼Óµ÷ÊÔĞÅÏ¢
+    printf("Dequeued instruction: %s\n", instruction); // æ·»åŠ è°ƒè¯•ä¿¡æ¯
     return true;
 }
 
 uint16_t find_variable_address(Variable variables[], int var_count, const char *var_name) {
     for (int i = 0; i < var_count; i++) {
         if (strcmp(variables[i].name, var_name) == 0) {
-            // ·µ»Ø±äÁ¿ÔÚÊı×éÖĞµÄË÷Òı×÷ÎªµØÖ·
-            return (uint16_t)(i + 0x1000); // ¼ÙÉè´Ó0x1000¿ªÊ¼·ÖÅäµØÖ·
+            // è¿”å›å˜é‡åœ¨æ•°ç»„ä¸­çš„ç´¢å¼•ä½œä¸ºåœ°å€
+            return (uint16_t)(i + 0x1000); // å‡è®¾ä»0x1000å¼€å§‹åˆ†é…åœ°å€
         }
     }
-    return 0; // ÕÒ²»µ½±äÁ¿·µ»Ø0
+    return 0; // æ‰¾ä¸åˆ°å˜é‡è¿”å›0
 }
+
 
 
 
