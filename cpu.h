@@ -2,40 +2,41 @@
 #define CPU_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
-// ¶¨Òå CPU ½á¹¹Ìå
+// å®šä¹‰ CPU ç»“æ„ä½“
 typedef struct CPU {
-    uint16_t AX, BX, CX, DX;  // Í¨ÓÃ¼Ä´æÆ÷
-    uint8_t AL, AH;           // AX µÄµÍÎ»ºÍ¸ßÎ»
-    uint16_t SP, BP, SI, DI;  // ¶ÑÕ»¼Ä´æÆ÷
-    uint16_t IP;              // Ö¸ÁîÖ¸Õë
-    uint16_t CS, DS, ES, SS;  // ¶Î¼Ä´æÆ÷
-    uint8_t CF;               // ½øÎ»±êÖ¾
-    uint8_t ZF;               // Áã±êÖ¾
-    uint8_t SF;               // ·ûºÅ±êÖ¾
-    uint8_t OF;               // Òç³ö±êÖ¾
-    uint8_t PF;               // ÆæÅ¼±êÖ¾
-    uint8_t DF;               // ·½Ïò±êÖ¾
-    uint8_t IF;               // ÖĞ¶Ï±êÖ¾
+    uint16_t AX, BX, CX, DX;  // é€šç”¨å¯„å­˜å™¨
+    uint8_t AL, AH;           // AX çš„ä½ä½å’Œé«˜ä½
+    uint16_t SP, BP, SI, DI;  // å †æ ˆå¯„å­˜å™¨
+    uint16_t IP;              // æŒ‡ä»¤æŒ‡é’ˆ
+    uint16_t CS, DS, ES, SS;  // æ®µå¯„å­˜å™¨
+    uint8_t CF;               // è¿›ä½æ ‡å¿—
+    uint8_t ZF;               // é›¶æ ‡å¿—
+    uint8_t SF;               // ç¬¦å·æ ‡å¿—
+    uint8_t OF;               // æº¢å‡ºæ ‡å¿—
+    uint8_t PF;               // å¥‡å¶æ ‡å¿—
+    uint8_t DF;               // æ–¹å‘æ ‡å¿—
+    uint8_t IF;               // ä¸­æ–­æ ‡å¿—
     uint32_t FLAGS;
 } CPU;
 
-// ±êÖ¾Î»¶¨Òå
-#define FLAG_CF  0x0001 // ½øÎ»±êÖ¾
-#define FLAG_ZF  0x0002 // Áã±êÖ¾
-#define FLAG_SF  0x0004 // ·ûºÅ±êÖ¾
-#define FLAG_OF  0x0008 // Òç³ö±êÖ¾
-#define FLAG_PF  0x0010 // ÆæÅ¼±êÖ¾
-#define FLAG_DF 0x0020 // ·½Ïò±êÖ¾
-#define FLAG_IF 0x0040 // ÖĞ¶Ï±êÖ¾
+// æ ‡å¿—ä½å®šä¹‰
+#define FLAG_CF  0x0001 // è¿›ä½æ ‡å¿—
+#define FLAG_ZF  0x0002 // é›¶æ ‡å¿—
+#define FLAG_SF  0x0004 // ç¬¦å·æ ‡å¿—
+#define FLAG_OF  0x0008 // æº¢å‡ºæ ‡å¿—
+#define FLAG_PF  0x0010 // å¥‡å¶æ ‡å¿—
+#define FLAG_DF 0x0020 // æ–¹å‘æ ‡å¿—
+#define FLAG_IF 0x0040 // ä¸­æ–­æ ‡å¿—
 
 
 #define STACK_SIZE 0xFFFF
-#define STACK_BOTTOM 0x0000  // Õ»µ×
-#define STACK_TOP (STACK_SIZE) // Õ»¶¥
+#define STACK_BOTTOM 0x0000  // æ ˆåº•
+#define STACK_TOP (STACK_SIZE) // æ ˆé¡¶
 
 
-// ÉùÃ÷º¯Êı
+// å£°æ˜å‡½æ•°
 void cpu_init(CPU *cpu);
 void cpu_reset_flags(CPU *cpu);
 void cpu_set_flag(CPU *cpu, uint16_t flag, int condition);
@@ -49,6 +50,7 @@ void cpu_update_flags_logical(CPU *cpu, uint32_t result);
 void cpu_jmp(CPU *cpu, uint16_t address);
 void cpu_toggle_flag(CPU *cpu, uint16_t flag);
 uint16_t cpu_pop(CPU *cpu);
+bool cpu_get_flag(CPU *cpu, uint16_t flag);
 
 #endif // CPU_H
 
