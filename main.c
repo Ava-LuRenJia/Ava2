@@ -1,70 +1,99 @@
-/*#include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 #include "cpu.h"
 #include "biu.h"
 #include "eu.h"
 #include "Chip2164.h"
 
-#define MAX_VARIABLES 100 // ¶¨ÒåÒ»¸ö×î´ó±äÁ¿ÊıÁ¿
-#define MAX_INPUT_SIZE 1024 // ¶¨ÒåÊäÈë´óĞ¡
-
+#define MAX_VARIABLES 100 // å®šä¹‰æœ€å¤§å˜é‡æ•°é‡
+#define MAX_INPUT_SIZE 1024 // å®šä¹‰è¾“å…¥å¤§å°
 
 int main() {
     CPU cpu;
     BIU biu;
-    Variable variables[MAX_VARIABLES]; // ±äÁ¿Êı×é
-    int var_count = 0; // ±äÁ¿¼ÆÊıÆ÷
+    Variable variables[MAX_VARIABLES]; // å˜é‡æ•°ç»„
 
     cpu_init(&cpu);
     init_biu(&biu);
 
-    printf("ÇëÊäÈë»ã±àÖ¸Áî£¬Ã¿ĞĞÒ»Ìõ£¬ÊäÈë 'END' ½áÊøÊäÈë:\n");
+    printf("è¯·è¾“å…¥æ±‡ç¼–æŒ‡ä»¤ï¼Œæ¯è¡Œä¸€æ¡ï¼Œè¾“å…¥ 'END START' ç»“æŸè¾“å…¥:\n");
 
     char input[MAX_INPUT_SIZE] = {0};
     char temp[50];
 
-    // ÊÕ¼¯ËùÓĞÊäÈëÖ¸Áî
+    // æ”¶é›†æ‰€æœ‰è¾“å…¥æŒ‡ä»¤
     while (1) {
         fgets(temp, sizeof(temp), stdin);
-        temp[strcspn(temp, "\n")] = '\0'; // ÒÆ³ı»»ĞĞ·û
+        temp[strcspn(temp, "\n")] = '\0'; // ç§»é™¤æ¢è¡Œç¬¦
 
-        // ¼ì²é½áÊø±êÖ¾
-        if (strcmp(temp, "END") == 0) {
+        // æ£€æŸ¥ç»“æŸæ ‡å¿—
+        if (strcmp(temp, "END START") == 0) {
             break;
         }
         if (strlen(temp) == 0) {
-            continue; // Ìø¹ı¿ÕĞĞ
+            continue; // è·³è¿‡ç©ºè¡Œ
         }
 
-        // È·±£²»»á³¬³öÊäÈë´óĞ¡
+        // ç¡®ä¿ä¸ä¼šè¶…å‡ºè¾“å…¥å¤§å°
         if (strlen(input) + strlen(temp) + 2 < MAX_INPUT_SIZE) {
             snprintf(input + strlen(input), sizeof(input) - strlen(input), "%s\n", temp);
         } else {
-            printf("ÊäÈë¹ı³¤£¬ÎŞ·¨¼ÌĞø¡£\n");
+            printf("è¾“å…¥è¿‡é•¿ï¼Œæ— æ³•ç»§ç»­ã€‚\n");
             break;
         }
     }
 
-    // µ÷ÓÃ parse_segment ½âÎöÊäÈëµÄ»ã±à´úÂë
+    // è°ƒç”¨ parse_segment è§£æè¾“å…¥çš„æ±‡ç¼–ä»£ç 
     parse_segment(input, &biu, &cpu, variables, &var_count);
 
-    // Ö´ĞĞÖ¸Áî
-    char instruction[50]; // ´æ´¢´Ó¶ÓÁĞÖĞÈ¡³öµÄÖ¸Áî
-    int instruction_count = 0; // Í³¼ÆÖ¸ÁîÊıÁ¿
-    while (dequeue_instruction(&biu, instruction)) {
-        execute_code(&cpu, &biu, variables, var_count); // Ö´ĞĞµ¥ÌõÖ¸Áî
-        printf("ÒÑÖ´ĞĞÖ¸Áî: %s\n", instruction);
-        instruction_count++;
-    }
+    // æ‰§è¡Œé˜Ÿåˆ—ä¸­æ‰€æœ‰æŒ‡ä»¤
+    execute_code(&cpu, &biu, variables, var_count);
 
-    printf("×Ü¹²Ö´ĞĞÁË %d ÌõÖ¸Áî\n", instruction_count);
+    printf("ç¨‹åºæ‰§è¡Œå®Œæ¯•ã€‚\n");
 
     return 0;
 }
 
+
+
+
+
+//ä»¥ä¸‹ä¸»å‡½æ•°æ˜¯æµ‹è¯•Chip2164.cèƒ½ä¸èƒ½æ­£å¸¸è¿è¡Œ
+/*
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include "Chip2164.h"
+
+#define MEMORY_SIZE 65536 // 64K x 1 ä½çš„å­˜å‚¨å®¹é‡
+
+int main() {
+    Memory2164 memory;
+    initMemory2164(&memory);
+
+    // å†™å…¥æ•°æ®ç¤ºä¾‹
+    uint16_t address_to_write = 0x01A0; // è¦å†™å…¥çš„åœ°å€
+    uint8_t data_to_write = 0xFF;        // è¦å†™å…¥çš„æ•°æ®
+    write_2164(&memory, address_to_write, data_to_write);
+    printf("å·²å†™å…¥æ•°æ®: %02X åˆ°åœ°å€: %04X\n", data_to_write, address_to_write);
+
+    // è¯»å–æ•°æ®ç¤ºä¾‹
+    uint16_t address_to_read = 0x01A0; // è¦è¯»å–çš„åœ°å€
+    uint8_t read_data_value = read_2164(&memory, address_to_read);
+    printf("ä»åœ°å€: %04X è¯»å–åˆ°æ•°æ®: %02X\n", address_to_read, read_data_value);
+
+    // å°è¯•è¯»å–ä¸€ä¸ªæœªå†™å…¥è¿‡çš„åœ°å€
+    uint16_t new_address_to_read = 0x01A1; // è¦è¯»å–çš„åœ°å€
+    uint8_t new_read_data_value = read_2164(&memory, new_address_to_read);
+    printf("ä»åœ°å€: %04X è¯»å–åˆ°æ•°æ®: %02X\n", new_address_to_read, new_read_data_value);
+
+    return 0;
+}
 */
 
 
+/*
 #include <stdio.h>
 #include <string.h>
 #include "cpu.h"
@@ -79,7 +108,6 @@ int main() {
 int main() {
     CPU cpu;
     BIU biu;
-    /*try();*/    //×÷Òµ5²âÊÔ
     Memory2164 memory;
     Variable variables[MAX_VARIABLES];
     int var_count = 0;
@@ -88,7 +116,7 @@ int main() {
     init_biu(&biu);
     initMemory2164(&memory);
 
-    printf("ÇëÊäÈë»ã±àÖ¸Áî£¬Ã¿ĞĞÒ»Ìõ£¬ÊäÈë 'END START' ½áÊøÊäÈë:\n");
+    printf("è¯·è¾“å…¥æ±‡ç¼–æŒ‡ä»¤ï¼Œæ¯è¡Œä¸€æ¡ï¼Œè¾“å…¥ 'END START' ç»“æŸè¾“å…¥:\n");
 
     char input[MAX_INPUT_SIZE] = {0};
     char temp[50];
@@ -107,84 +135,49 @@ int main() {
         if (strlen(input) + strlen(temp) + 2 < MAX_INPUT_SIZE) {
             snprintf(input + strlen(input), sizeof(input) - strlen(input), "%s\n", temp);
         } else {
-            printf("ÊäÈë¹ı³¤£¬ÎŞ·¨¼ÌĞø¡£\n");
+            printf("è¾“å…¥è¿‡é•¿ï¼Œæ— æ³•ç»§ç»­ã€‚\n");
             break;
         }
     }
 
     parse_segment(input, &biu, &cpu, variables, &var_count);
 
-    printf("¿ªÊ¼Ö´ĞĞÖ¸Áî...\n");
+    printf("å¼€å§‹æ‰§è¡ŒæŒ‡ä»¤...\n");
     printf("--------------------------------------------------------\n");
     char instruction[50];
     int instruction_count = 0;
 
-    // Ö´ĞĞÖ¸Áî¶ÓÁĞ
+    // æ‰§è¡ŒæŒ‡ä»¤é˜Ÿåˆ—
     while (dequeue_instruction(&biu, instruction)) {
         if (strstr(instruction, "READ") != NULL) {
             uint16_t address = 0;
             if (sscanf(instruction, "READ %hu", &address) == 1) {
-                // µØÖ·×ÜÏß·¢ËÍµ½ 2164£¬²¢¾­¹ıµØÖ·ÒëÂëºó´«Êä¸øĞĞµØÖ·ºÍÁĞµØÖ·
+                // åœ°å€æ€»çº¿å‘é€åˆ° 2164ï¼Œå¹¶ç»è¿‡åœ°å€è¯‘ç åä¼ è¾“ç»™è¡Œåœ°å€å’Œåˆ—åœ°å€
                 uint8_t data = read_2164(&memory, address);
-                printf("¶ÁÈ¡Êı¾İ: %02X\n", data);
+                printf("è¯»å–æ•°æ®: %02X\n", data);
             } else {
-                printf("READÖ¸Áî¸ñÊ½´íÎó: %s\n", instruction);
+                printf("READæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", instruction);
             }
         } else if (strstr(instruction, "WRITE") != NULL) {
             uint16_t address = 0;
             uint8_t data = 0;
             if (sscanf(instruction, "WRITE %hu %hhu", &address, &data) == 2) {
-                // µØÖ·×ÜÏß·¢ËÍµ½ 2164£¬²¢¾­¹ıµØÖ·ÒëÂëºó´«Êä¸øĞĞµØÖ·ºÍÁĞµØÖ·
+                // åœ°å€æ€»çº¿å‘é€åˆ° 2164ï¼Œå¹¶ç»è¿‡åœ°å€è¯‘ç åä¼ è¾“ç»™è¡Œåœ°å€å’Œåˆ—åœ°å€
                 write_2164(&memory, address, data);
-                printf("Ğ´ÈëÊı¾İ: %02X µ½µØÖ· %04X\n", data, address);
+                printf("å†™å…¥æ•°æ®: %02X åˆ°åœ°å€ %04X\n", data, address);
             } else {
-                printf("WRITEÖ¸Áî¸ñÊ½´íÎó: %s\n", instruction);
+                printf("WRITEæŒ‡ä»¤æ ¼å¼é”™è¯¯: %s\n", instruction);
             }
         } else {
-            // ´¦ÀíÆäËûÖ¸Áî
+            // å¤„ç†å…¶ä»–æŒ‡ä»¤
             execute_code(&cpu, &biu, variables, var_count);
         }
 
-        printf("ÒÑÖ´ĞĞÖ¸Áî: %s\n", instruction);
+        printf("å·²æ‰§è¡ŒæŒ‡ä»¤: %s\n", instruction);
         instruction_count++;
     }
 
-    printf("×Ü¹²Ö´ĞĞÁË %d ÌõÖ¸Áî\n", instruction_count);
+    printf("æ€»å…±æ‰§è¡Œäº† %d æ¡æŒ‡ä»¤\n", instruction_count);
 
     return 0;
-}
-
-
-//ÒÔÏÂÖ÷º¯ÊıÊÇ²âÊÔChip2164.cÄÜ²»ÄÜÕı³£ÔËĞĞ
-/*
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include "Chip2164.h"
-
-#define MEMORY_SIZE 65536 // 64K x 1 Î»µÄ´æ´¢ÈİÁ¿
-
-int main() {
-    Memory2164 memory;
-    initMemory2164(&memory);
-
-    // Ğ´ÈëÊı¾İÊ¾Àı
-    uint16_t address_to_write = 0x01A0; // ÒªĞ´ÈëµÄµØÖ·
-    uint8_t data_to_write = 0xFF;        // ÒªĞ´ÈëµÄÊı¾İ
-    write_2164(&memory, address_to_write, data_to_write);
-    printf("ÒÑĞ´ÈëÊı¾İ: %02X µ½µØÖ·: %04X\n", data_to_write, address_to_write);
-
-    // ¶ÁÈ¡Êı¾İÊ¾Àı
-    uint16_t address_to_read = 0x01A0; // Òª¶ÁÈ¡µÄµØÖ·
-    uint8_t read_data_value = read_2164(&memory, address_to_read);
-    printf("´ÓµØÖ·: %04X ¶ÁÈ¡µ½Êı¾İ: %02X\n", address_to_read, read_data_value);
-
-    // ³¢ÊÔ¶ÁÈ¡Ò»¸öÎ´Ğ´Èë¹ıµÄµØÖ·
-    uint16_t new_address_to_read = 0x01A1; // Òª¶ÁÈ¡µÄµØÖ·
-    uint8_t new_read_data_value = read_2164(&memory, new_address_to_read);
-    printf("´ÓµØÖ·: %04X ¶ÁÈ¡µ½Êı¾İ: %02X\n", new_address_to_read, new_read_data_value);
-
-    return 0;
-}
-*/
+}*/
