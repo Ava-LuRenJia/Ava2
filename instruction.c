@@ -15,14 +15,13 @@ void push(CPU *cpu, uint16_t src) {
     printf("PUSH executed: Value = 0x%04X, SP = 0x%04X\n", src, cpu->SP);
 }
 
-
 // POP 指令
 uint16_t pop(CPU *cpu) {
-    if (cpu->SP > STACK_TOP - 2) {
+    if (cpu->SP > STACK_TOP - 2) { // 栈的顶部检测
         printf("Error: Stack underflow\n");
         return 0; // 返回一个默认值
     }
-    uint16_t value = memory[cpu->SP];
+    uint16_t value = memory[cpu->SP] | (memory[cpu->SP + 1] << 8); // 读取高低位数据
     cpu->SP += 2;
     printf("POP executed: Value = 0x%04X, SP = 0x%04X\n", value, cpu->SP);
     return value;
@@ -77,16 +76,60 @@ void sbb(CPU *cpu, uint16_t *dest, uint16_t src) {
 }
 
 
-// INC 指令 (自增)
-void inc(CPU *cpu, uint16_t *value) {
-    uint32_t result = (uint32_t)(*value) + 1;
-    *value = (uint16_t)result;
+#include <string.h>
+#include <stdio.h>
+
+// 假设 cpu_update_flags_arithmetic 已定义，接下来提供一个更新后的 inc 函数
+void inc(CPU *cpu, const char *original_instruction) {
+    // 提取指令中的寄存器名
+    char reg_name[4];
+    sscanf(original_instruction, "INC %3s", reg_name);
+
+    uint32_t result = 0;
+    uint32_t src = 1; // 因为是自增，所以源值始终为 1
+    uint32_t dest = 0;  // 目标寄存器的值（需要根据寄存器来确定）
+
+    // 根据寄存器名执行自增操作
+    if (strcmp(reg_name, "AX") == 0) {
+        dest = cpu->AX;
+        result = dest + src;
+        cpu->AX = (uint16_t)result;
+        printf("INC executed: AX = 0x%04X\n", cpu->AX);
+    } else if (strcmp(reg_name, "BX") == 0) {
+        dest = cpu->BX;
+        result = dest + src;
+        cpu->BX = (uint16_t)result;
+        printf("INC executed: BX = 0x%04X\n", cpu->BX);
+    } else if (strcmp(reg_name, "CX") == 0) {
+        dest = cpu->CX;
+        result = dest + src;
+        cpu->CX = (uint16_t)result;
+        printf("INC executed: CX = 0x%04X\n", cpu->CX);
+    } else if (strcmp(reg_name, "DX") == 0) {
+        dest = cpu->DX;
+        result = dest + src;
+        cpu->DX = (uint16_t)result;
+        printf("INC executed: DX = 0x%04X\n", cpu->DX);
+    } else if (strcmp(reg_name, "SI") == 0) {
+        dest = cpu->SI;
+        result = dest + src;
+        cpu->SI = (uint16_t)result;
+        printf("INC executed: SI = 0x%04X\n", cpu->SI);
+    } else if (strcmp(reg_name, "DI") == 0) {
+        dest = cpu->DI;
+        result = dest + src;
+        cpu->DI = (uint16_t)result;
+        printf("INC executed: DI = 0x%04X\n", cpu->DI);
+    } else {
+        // 如果不识别的寄存器，报错
+        printf("Error: Unknown register %s\n", reg_name);
+        return;
+    }
 
     // 更新标志位
-    cpu_update_flags_arithmetic(cpu, result, 1, *value);
-
-    printf("INC executed: Value = 0x%04X\n", *value);
+    cpu_update_flags_arithmetic(cpu, result, src, (uint32_t)dest);
 }
+
 
 // DEC 指令 (自减)
 void dec(CPU *cpu, uint16_t *value) {
@@ -100,34 +143,388 @@ void dec(CPU *cpu, uint16_t *value) {
 }
 
 // AND 指令 (位与)
-void and(CPU *cpu, uint16_t *dest, uint16_t src) {
-    *dest &= src;
+void and(CPU *cpu, const char *original_instruction, AddressingMode mode) {
+    uint16_t src = 0, dest = 0;  // 定义源和目标操作数
+    char instr_name[4];
+    sscanf(original_instruction, "%3s", instr_name);
+
+    // 根据模式解析源和目标操作数
+    if (mode == IMMEDIATE) {
+        // 获取目标操作数
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+
+            // 处理立即数，判断是否为十六进制格式
+            operand_str = strtok(NULL, ", ");
+            if (operand_str) {
+                if (operand_str[strlen(operand_str) - 1] == 'h' || operand_str[strlen(operand_str) - 1] == 'H') {
+                    operand_str[strlen(operand_str) - 1] = '\0'; // 去掉 'h'
+                    src = (uint16_t)strtol(operand_str, NULL, 16); // 解析十六进制数
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                } else if (operand_str[0] == '0' && operand_str[1] == 'x') {
+                    src = (uint16_t)strtol(operand_str, NULL, 16); // 解析十六进制数
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                } else {
+                    src = (uint16_t)strtol(operand_str, NULL, 10); // 默认十进制
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                }
+            }
+        }
+    } else if (mode == REGISTER) {
+        // 处理寄存器模式
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+        }
+
+        // 获取源操作数
+        operand_str = strtok(NULL, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                src = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Source: AL, src = 0x%02X\n", src);
+            } else if (strstr(operand_str, "AX")) {
+                src = cpu->AX;
+                printf("Source: AX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "BX")) {
+                src = cpu->BX;
+                printf("Source: BX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "CX")) {
+                src = cpu->CX;
+                printf("Source: CX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "DX")) {
+                src = cpu->DX;
+                printf("Source: DX, src = 0x%04X\n", src);
+            }
+        }
+    }
+
+    // 执行位与操作
+    dest = dest & src;  // 直接修改 dest 而不使用解引用
 
     // 更新标志位
-    cpu_update_flags_logical(cpu, *dest);
+    cpu_update_flags_logical(cpu, dest);
 
-    printf("AND executed: Result = 0x%04X\n", *dest);
+    printf("AND executed: Result = 0x%04X\n", dest);
+
+    // 更新目标寄存器
+    if (strstr(original_instruction, "AL")) {
+        cpu->AX = (cpu->AX & 0xFF00) | (dest & 0x00FF); // 更新 AL
+    } else if (strstr(original_instruction, "AX")) {
+        cpu->AX = dest; // 更新 AX
+    } else if (strstr(original_instruction, "BX")) {
+        cpu->BX = dest; // 更新 BX
+    } else if (strstr(original_instruction, "CX")) {
+        cpu->CX = dest; // 更新 CX
+    } else if (strstr(original_instruction, "DX")) {
+        cpu->DX = dest; // 更新 DX
+    }
 }
+
+
+
 
 // OR 指令 (位或)
-void or(CPU *cpu, uint16_t *dest, uint16_t src) {
-    *dest |= src;
+void or(CPU *cpu, const char *original_instruction, AddressingMode mode) {
+    uint16_t src = 0, dest = 0;  // 定义源和目标操作数
+    char instr_name[4];
+    sscanf(original_instruction, "%3s", instr_name);
+
+    // 根据模式解析源和目标操作数
+    if (mode == IMMEDIATE) {
+        // 获取目标操作数
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+
+            // 处理立即数，判断是否为十六进制格式
+            operand_str = strtok(NULL, ", ");
+            if (operand_str) {
+                if (operand_str[strlen(operand_str) - 1] == 'h' || operand_str[strlen(operand_str) - 1] == 'H') {
+                    operand_str[strlen(operand_str) - 1] = '\0'; // 去掉 'h'
+                    src = (uint16_t)strtol(operand_str, NULL, 16); // 解析十六进制数
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                } else if (operand_str[0] == '0' && operand_str[1] == 'x') {
+                    src = (uint16_t)strtol(operand_str, NULL, 16); // 解析十六进制数
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                } else {
+                    src = (uint16_t)strtol(operand_str, NULL, 10); // 默认十进制
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                }
+            }
+        }
+    } else if (mode == REGISTER) {
+        // 处理寄存器模式
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+        }
+
+        // 获取源操作数
+        operand_str = strtok(NULL, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                src = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Source: AL, src = 0x%02X\n", src);
+            } else if (strstr(operand_str, "AX")) {
+                src = cpu->AX;
+                printf("Source: AX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "BX")) {
+                src = cpu->BX;
+                printf("Source: BX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "CX")) {
+                src = cpu->CX;
+                printf("Source: CX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "DX")) {
+                src = cpu->DX;
+                printf("Source: DX, src = 0x%04X\n", src);
+            }
+        }
+    }
+
+    // 执行按位或操作
+    dest = dest | src;  // 按位或操作
 
     // 更新标志位
-    cpu_update_flags_logical(cpu, *dest);
+    cpu_update_flags_logical(cpu, dest);
 
-    printf("OR executed: Result = 0x%04X\n", *dest);
+    printf("OR executed: Result = 0x%04X\n", dest);
+
+    // 更新目标寄存器
+    if (strstr(original_instruction, "AL")) {
+        cpu->AX = (cpu->AX & 0xFF00) | (dest & 0x00FF); // 更新 AL
+    } else if (strstr(original_instruction, "AX")) {
+        cpu->AX = dest; // 更新 AX
+    } else if (strstr(original_instruction, "BX")) {
+        cpu->BX = dest; // 更新 BX
+    } else if (strstr(original_instruction, "CX")) {
+        cpu->CX = dest; // 更新 CX
+    } else if (strstr(original_instruction, "DX")) {
+        cpu->DX = dest; // 更新 DX
+    }
 }
+
 
 // XOR 指令 (位异或)
-void xor(CPU *cpu, uint16_t *dest, uint16_t src) {
-    *dest ^= src;
+void xor(CPU *cpu, const char *original_instruction, AddressingMode mode) {
+    uint16_t src = 0, dest = 0;  // 定义源和目标操作数
+    char instr_name[4];
+    sscanf(original_instruction, "%3s", instr_name);
+
+    // 根据模式解析源和目标操作数
+    if (mode == IMMEDIATE) {
+        // 获取目标操作数
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+
+            // 处理立即数，判断是否为十六进制格式
+            operand_str = strtok(NULL, ", ");
+            if (operand_str) {
+                if (operand_str[strlen(operand_str) - 1] == 'h' || operand_str[strlen(operand_str) - 1] == 'H') {
+                    operand_str[strlen(operand_str) - 1] = '\0'; // 去掉 'h'
+                    src = (uint16_t)strtol(operand_str, NULL, 16); // 解析十六进制数
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                } else if (operand_str[0] == '0' && operand_str[1] == 'x') {
+                    src = (uint16_t)strtol(operand_str, NULL, 16); // 解析十六进制数
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                } else {
+                    src = (uint16_t)strtol(operand_str, NULL, 10); // 默认十进制
+                    printf("Source: Immediate, src = 0x%04X\n", src);
+                }
+            }
+        }
+    } else if (mode == REGISTER) {
+        // 处理寄存器模式
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+        }
+
+        // 获取源操作数
+        operand_str = strtok(NULL, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                src = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Source: AL, src = 0x%02X\n", src);
+            } else if (strstr(operand_str, "AX")) {
+                src = cpu->AX;
+                printf("Source: AX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "BX")) {
+                src = cpu->BX;
+                printf("Source: BX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "CX")) {
+                src = cpu->CX;
+                printf("Source: CX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "DX")) {
+                src = cpu->DX;
+                printf("Source: DX, src = 0x%04X\n", src);
+            }
+        }
+    }
+
+    // 执行位异或操作
+    dest ^= src;  // 直接修改 dest 而不使用解引用
 
     // 更新标志位
-    cpu_update_flags_logical(cpu, *dest);
+    cpu_update_flags_logical(cpu, dest);
 
-    printf("XOR executed: Result = 0x%04X\n", *dest);
+    printf("XOR executed: Result = 0x%04X\n", dest);
+
+    // 更新目标寄存器
+    if (strstr(original_instruction, "AL")) {
+        cpu->AX = (cpu->AX & 0xFF00) | (dest & 0x00FF); // 更新 AL
+    } else if (strstr(original_instruction, "AX")) {
+        cpu->AX = dest; // 更新 AX
+    } else if (strstr(original_instruction, "BX")) {
+        cpu->BX = dest; // 更新 BX
+    } else if (strstr(original_instruction, "CX")) {
+        cpu->CX = dest; // 更新 CX
+    } else if (strstr(original_instruction, "DX")) {
+        cpu->DX = dest; // 更新 DX
+    }
 }
+
+void not(CPU *cpu, const char *original_instruction) {
+    uint16_t operand = 0;  // 定义操作数
+    char instr_name[4];
+    sscanf(original_instruction, "%3s", instr_name);
+
+    // 获取操作数
+    char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+    if (operand_str) {
+        if (strstr(operand_str, "AL")) {
+            operand = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+            printf("Operand: AL, operand = 0x%02X\n", operand);
+        } else if (strstr(operand_str, "AX")) {
+            operand = cpu->AX;
+            printf("Operand: AX, operand = 0x%04X\n", operand);
+        } else if (strstr(operand_str, "BX")) {
+            operand = cpu->BX;
+            printf("Operand: BX, operand = 0x%04X\n", operand);
+        } else if (strstr(operand_str, "CX")) {
+            operand = cpu->CX;
+            printf("Operand: CX, operand = 0x%04X\n", operand);
+        } else if (strstr(operand_str, "DX")) {
+            operand = cpu->DX;
+            printf("Operand: DX, operand = 0x%04X\n", operand);
+        }
+    }
+
+    // 执行取反操作
+    operand = ~operand;  // 对操作数进行取反
+
+    // 更新标志位
+    cpu_update_flags_logical(cpu, operand);
+
+    printf("NOT executed: Result = 0x%04X\n", operand);
+
+    // 更新目标寄存器
+    if (strstr(original_instruction, "AL")) {
+        cpu->AX = (cpu->AX & 0xFF00) | (operand & 0x00FF); // 更新 AL
+    } else if (strstr(original_instruction, "AX")) {
+        cpu->AX = operand; // 更新 AX
+    } else if (strstr(original_instruction, "BX")) {
+        cpu->BX = operand; // 更新 BX
+    } else if (strstr(original_instruction, "CX")) {
+        cpu->CX = operand; // 更新 CX
+    } else if (strstr(original_instruction, "DX")) {
+        cpu->DX = operand; // 更新 DX
+    }
+}
+
+
 
 // TEST 指令 (逻辑与，用于更新标志位)
 void test(CPU *cpu, uint16_t value1, uint16_t value2) {
@@ -151,12 +548,30 @@ void hlt() {
     // 这里可以添加代码来停止 CPU 执行
 }
 
-// JMP 指令 (无条件跳转)
-void jmp(CPU *cpu, uint16_t address) {
-    cpu->IP = address; // 更新指令指针到新的地址
+void jmp(CPU *cpu, const char *original_instruction, LabelAddress label_table[], int label_count) {
+    char label[50];
+    if (sscanf(original_instruction, "JMP %s", label) == 1) {
+        // 查找标签的地址
+        uint16_t address = 0xFFFF; // 用来标记未找到标签的情况
+        for (int i = 0; i < label_count; i++) {
+            if (strcmp(label_table[i].label, label) == 0) {
+                address = label_table[i].address;  // 找到标签的地址
+                break;
+            }
+        }
 
-    printf("JMP executed: Jumping to address 0x%04X\n", address);
+        if (address != 0xFFFF) {
+            uint16_t old_ip = cpu->IP;  // 保存跳转前的 IP
+            cpu->IP = address;          // 更新 IP 为标签对应的地址
+            printf("JMP executed: IP changed from 0x%04X to 0x%04X (Jumping to label %s)\n", old_ip, cpu->IP, label);
+        } else {
+            printf("Error: Label '%s' not found.\n", label);
+        }
+    } else {
+        printf("Invalid JMP instruction format: %s\n", original_instruction);
+    }
 }
+
 
 // CALL 指令 (调用子程序)
 void call(CPU *cpu, uint16_t address) {
@@ -180,12 +595,97 @@ void ret(CPU *cpu) {
 }
 
 // ADD 指令 (无符号加法)
-void add(CPU *cpu, uint16_t *dest, uint16_t src) {
-    uint32_t result = (uint32_t)*dest + (uint32_t)src;
-    *dest = (uint16_t)result;
+void add(CPU *cpu, const char *original_instruction, AddressingMode mode) {
+    uint16_t src = 0, dest = 0;
+    char instr_name[4];
+
+    // 提取指令名称（如 "ADD"）
+    sscanf(original_instruction, "%3s", instr_name);
+
+    // 根据mode判断并提取源和目标操作数
+    if (mode == IMMEDIATE) {
+        // 处理立即数模式
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            } else {
+                // 如果是立即数
+                dest = (uint16_t)strtol(operand_str, NULL, 10);
+                printf("Destination: Immediate, dest = 0x%04X\n", dest);
+            }
+        }
+
+        // 获取立即数
+        operand_str = strtok(NULL, ", ");
+        if (operand_str) {
+            src = (uint16_t)strtol(operand_str, NULL, 10);
+            printf("Source: Immediate, src = 0x%04X\n", src);
+        }
+
+    } else if (mode == REGISTER) {
+        // 处理寄存器模式
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+        }
+
+        // 获取源操作数
+        operand_str = strtok(NULL, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                src = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Source: AL, src = 0x%02X\n", src);
+            } else if (strstr(operand_str, "AX")) {
+                src = cpu->AX;
+                printf("Source: AX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "BX")) {
+                src = cpu->BX;
+                printf("Source: BX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "CX")) {
+                src = cpu->CX;
+                printf("Source: CX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "DX")) {
+                src = cpu->DX;
+                printf("Source: DX, src = 0x%04X\n", src);
+            }
+        }
+    }
+
+    // 执行加法操作
+    uint32_t result = (uint32_t)dest + (uint32_t)src;
+    dest = (uint16_t)result;
 
     // 更新标志位
-    cpu_update_flags_arithmetic(cpu, result, src, *dest);
+    cpu_update_flags_arithmetic(cpu, result, src, dest);
 
     // 处理进位标志 CF（无符号加法）
     if (result > 0xFFFF) {
@@ -194,25 +694,136 @@ void add(CPU *cpu, uint16_t *dest, uint16_t src) {
         cpu->FLAGS &= ~FLAG_CF; // 清除进位标志
     }
 
-    printf("ADD executed: Result = 0x%04X\n", *dest);
+    printf("ADD executed: Result = 0x%04X\n", dest);
+
+    // 更新目标寄存器
+    if (strstr(original_instruction, "AL")) {
+        cpu->AX = (cpu->AX & 0xFF00) | (dest & 0x00FF); // 更新 AL
+    } else if (strstr(original_instruction, "AX")) {
+        cpu->AX = dest; // 更新 AX
+    } else if (strstr(original_instruction, "BX")) {
+        cpu->BX = dest; // 更新 BX
+    } else if (strstr(original_instruction, "CX")) {
+        cpu->CX = dest; // 更新 CX
+    } else if (strstr(original_instruction, "DX")) {
+        cpu->DX = dest; // 更新 DX
+    }
 }
 
-// SUB 指令 (无符号减法)
-void sub(CPU *cpu, uint16_t *dest, uint16_t src) {
-    uint32_t result = (uint32_t)*dest - (uint32_t)src;
-    *dest = (uint16_t)result;
+
+void sub(CPU *cpu, const char *original_instruction, AddressingMode mode) {
+    uint16_t src = 0, dest = 0;  // dest 是一个普通的变量，不是指针
+    char instr_name[4];
+
+    // 提取指令名称（如 "SUB"）
+    sscanf(original_instruction, "%3s", instr_name);
+
+    // 根据mode判断并提取源和目标操作数
+    if (mode == IMMEDIATE) {
+        // 处理立即数模式
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            } else {
+                // 如果是立即数
+                dest = (uint16_t)strtol(operand_str, NULL, 10);
+                printf("Destination: Immediate, dest = 0x%04X\n", dest);
+            }
+        }
+
+        // 获取立即数
+        operand_str = strtok(NULL, ", ");
+        if (operand_str) {
+            src = (uint16_t)strtol(operand_str, NULL, 10);
+            printf("Source: Immediate, src = 0x%04X\n", src);
+        }
+
+    } else if (mode == REGISTER) {
+        // 处理寄存器模式
+        char *operand_str = strtok((char *)original_instruction + strlen(instr_name) + 1, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                dest = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Destination: AL, dest = 0x%02X\n", dest);
+            } else if (strstr(operand_str, "AX")) {
+                dest = cpu->AX;
+                printf("Destination: AX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "BX")) {
+                dest = cpu->BX;
+                printf("Destination: BX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "CX")) {
+                dest = cpu->CX;
+                printf("Destination: CX, dest = 0x%04X\n", dest);
+            } else if (strstr(operand_str, "DX")) {
+                dest = cpu->DX;
+                printf("Destination: DX, dest = 0x%04X\n", dest);
+            }
+        }
+
+        // 获取源操作数
+        operand_str = strtok(NULL, ", ");
+        if (operand_str) {
+            if (strstr(operand_str, "AL")) {
+                src = cpu->AX & 0x00FF; // AL 是 AX 的低 8 位
+                printf("Source: AL, src = 0x%02X\n", src);
+            } else if (strstr(operand_str, "AX")) {
+                src = cpu->AX;
+                printf("Source: AX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "BX")) {
+                src = cpu->BX;
+                printf("Source: BX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "CX")) {
+                src = cpu->CX;
+                printf("Source: CX, src = 0x%04X\n", src);
+            } else if (strstr(operand_str, "DX")) {
+                src = cpu->DX;
+                printf("Source: DX, src = 0x%04X\n", src);
+            }
+        }
+    }
+
+    // 执行减法操作
+    uint32_t result = (uint32_t)dest - (uint32_t)src;
+    dest = (uint16_t)result;
 
     // 更新标志位
-    cpu_update_flags_arithmetic(cpu, result, -src, *dest);
+    cpu_update_flags_arithmetic(cpu, result, -src, dest);
 
     // 处理借位标志 CF
-    if (*dest > src) {
+    if (dest > src) {
         cpu->FLAGS |= FLAG_CF; // 设置借位标志
     } else {
         cpu->FLAGS &= ~FLAG_CF; // 清除借位标志
     }
 
-    printf("SUB executed: Result = 0x%04X\n", *dest);
+    printf("SUB executed: Result = 0x%04X\n", dest);
+
+    // 更新目标寄存器
+    if (strstr(original_instruction, "AL")) {
+        cpu->AX = (cpu->AX & 0xFF00) | (dest & 0x00FF); // 更新 AL
+    } else if (strstr(original_instruction, "AX")) {
+        cpu->AX = dest; // 更新 AX
+    } else if (strstr(original_instruction, "BX")) {
+        cpu->BX = dest; // 更新 BX
+    } else if (strstr(original_instruction, "CX")) {
+        cpu->CX = dest; // 更新 CX
+    } else if (strstr(original_instruction, "DX")) {
+        cpu->DX = dest; // 更新 DX
+    }
 }
 
 //MOV
@@ -342,13 +953,13 @@ void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char
 
 
 
-        case DIRECT: // 直接寻址   于11月6日对立即数寻址和寄存器寻址做了进一步改进
+        case DIRECT: // 直接寻址
             if (sscanf(instruction, "MOV %49[^,], %49s", destination_str, source_str) == 2) {
-                // 处理目标 destination，检查是否是内存地址
+                // 处理目标操作数：寄存器或内存地址
                 if (strstr(destination_str, "[") != NULL && strstr(destination_str, "]") != NULL) {
-                    // 目标是内存地址
+                    // 目标是内存地址，提取变量名
                     char var_name[50];
-                    sscanf(destination_str, "[%49[^]]]", var_name); // 提取变量名
+                    sscanf(destination_str, "[%49[^]]]", var_name);
                     memset(var_name + strlen(var_name), 0, sizeof(var_name) - strlen(var_name)); // 清空后续字符
 
                     bool found = false;
@@ -371,17 +982,65 @@ void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char
                         addr = &cpu->AX; // 指向 AL 的地址
                     } else if (strcmp(destination_str, "AX") == 0) {
                         addr = &cpu->AX; // 指向 AX 的地址
+                    } else if (strcmp(destination_str, "BX") == 0) {
+                        addr = &cpu->BX; // 指向 BX 的地址
+                    } else if (strcmp(destination_str, "CX") == 0) {
+                        addr = &cpu->CX; // 指向 CX 的地址
+                    } else if (strcmp(destination_str, "DX") == 0) {
+                        addr = &cpu->DX; // 指向 DX 的地址
+                    } else if (strcmp(destination_str, "SI") == 0) {
+                        addr = &cpu->SI; // 指向 SI 的地址
+                    } else if (strcmp(destination_str, "DI") == 0) {
+                        addr = &cpu->DI; // 指向 DI 的地址
+                    } else if (strcmp(destination_str, "SP") == 0) {
+                        addr = &cpu->SP; // 指向 SP 的地址
+                    } else if (strcmp(destination_str, "BP") == 0) {
+                        addr = &cpu->BP; // 指向 BP 的地址
                     } else {
                         printf("错误: 无效的目标操作数 '%s'。\n", destination_str);
                         return; // 返回错误
                     }
                 }
 
-                // 处理源操作数
-                if (strstr(source_str, "[") != NULL && strstr(source_str, "]") != NULL) {
+                // 处理源操作数：可以是立即数、寄存器、或变量地址（使用 OFFSET）
+                // 处理指令：MOV SI, OFFSET Str1
+                if (strncmp(source_str, "OFFSET", 6) == 0) {
+                    // 如果源操作数包含 OFFSET，提取后面的变量名
+                    char var_name[50];
+
+                    // 使用 sscanf 提取 OFFSET 后面的变量名
+                    if (sscanf(source_str, "OFFSET %49s", var_name) == 1) {
+                        // 检查变量是否带有方括号 [ ]
+                        if (var_name[0] == '[') {
+                            // 如果是带有方括号的，移除方括号
+                            memmove(var_name, var_name + 1, strlen(var_name)); // 向前移动一个字符
+                            var_name[strlen(var_name) - 1] = '\0'; // 移除最后一个字符（']'）
+                        }
+
+                        // 查找变量是否存在
+                        bool found = false;
+                        for (int i = 0; i < var_count; i++) {
+                            // 比较变量名
+                            if (strcmp(var_name, variables[i].name) == 0) {
+                                // 获取变量的地址
+                                src_value = (uint16_t)(&variables[i].value.word_value);
+                                found = true;
+                                break; // 找到变量后跳出循环
+                            }
+                        }
+                        if (!found) {
+                            printf("错误: 未找到变量 '%s'\n", var_name);
+                            return; // 返回错误
+                        }
+                    } else {
+                        printf("错误: 无法提取变量名\n");
+                        return; // 返回错误
+                    }
+                }
+                else if (strstr(source_str, "[") != NULL && strstr(source_str, "]") != NULL) {
                     // 源操作数是内存地址
                     char var_name[50];
-                    sscanf(source_str, "[%49[^]]]", var_name); // 提取变量名
+                    sscanf(source_str, "[%49[^]]]", var_name);
                     memset(var_name + strlen(var_name), 0, sizeof(var_name) - strlen(var_name)); // 清空后续字符
 
                     bool found = false;
@@ -391,7 +1050,7 @@ void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char
                         if (strncmp(var_name, variables[i].name, sizeof(var_name)) == 0) {
                             src_value = variables[i].value.word_value; // 获取变量值
                             found = true;
-                            break; // 找到后跳出循环
+                            break;
                         }
                     }
                     if (!found) {
@@ -406,6 +1065,12 @@ void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char
                         src_value = (cpu->AX >> 8) & 0xFF; // 获取 AH 的值
                     } else if (strcmp(source_str, "AX") == 0) {
                         src_value = cpu->AX; // 获取 AX 的值
+                    } else if (strcmp(source_str, "BX") == 0) {
+                        src_value = cpu->BX;
+                    } else if (strcmp(source_str, "CX") == 0) {
+                        src_value = cpu->CX;
+                    } else if (strcmp(source_str, "DX") == 0) {
+                        src_value = cpu->DX;
                     } else {
                         // 立即数
                         if (isdigit(source_str[0]) || (source_str[0] == '-' && isdigit(source_str[1]))) {
@@ -446,6 +1111,8 @@ void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char
                 return; // 返回错误
             }
             break;
+
+
 
 
         case INDIRECT: // 寄存器间接寻址
@@ -635,11 +1302,28 @@ void movsw(CPU *cpu) {
 }
 
 // MOVSB 指令 (字节移动)
-void movsb(CPU *cpu, uint16_t dest, uint16_t src) {
-    memory[dest] = memory[src]; // 将字节从 src 移动到 dest
+void movsb(CPU *cpu) {
+    // 获取源和目标地址
+    uint16_t src = cpu->SI;  // 源地址是 SI 寄存器
+    uint16_t dest = cpu->DI; // 目标地址是 DI 寄存器
 
+    // 将字节从 src 地址移动到 dest 地址
+    memory[dest] = memory[src];
+
+    // 打印执行结果
     printf("MOVSB executed: Src = 0x%04X, Dest = 0x%04X\n", src, dest);
+    printf("Value moved: 0x%02X\n", memory[src]);
+
+    // 更新 SI 和 DI 寄存器
+    if (cpu->FLAGS & 0x4000) {  // 如果 DF (方向标志) 被设置为 1（递减）
+        cpu->SI--;  // SI 寄存器递减
+        cpu->DI--;  // DI 寄存器递减
+    } else {  // 如果 DF (方向标志) 被清除为 0（递增）
+        cpu->SI++;  // SI 寄存器递增
+        cpu->DI++;  // DI 寄存器递增
+    }
 }
+
 
 void cmpsw(CPU *cpu) {
     uint16_t left = *(uint16_t *)&memory[cpu->SI];
@@ -650,12 +1334,30 @@ void cmpsw(CPU *cpu) {
 }
 
 void cmpsb(CPU *cpu) {
+    // 从内存中获取 `SI` 和 `DI` 指针处的 8 位数据
     uint8_t left = memory[cpu->SI];
     uint8_t right = memory[cpu->DI];
-    cpu_set_flag(cpu, FLAG_ZF, left == right);
-    cpu_set_flag(cpu, FLAG_CF, left < right);
-    cpu_set_flag(cpu, FLAG_SF, (left - right) & 0x80); // 设置符号标志
+
+    // 计算比较结果
+    int16_t result = (int16_t)left - (int16_t)right;
+
+    // 更新标志位
+    cpu_set_flag(cpu, FLAG_ZF, result == 0);             // 零标志：如果相等则设置
+    cpu_set_flag(cpu, FLAG_CF, left < right);            // 进位标志：如果 `left` 小于 `right` 则设置
+    cpu_set_flag(cpu, FLAG_SF, (result & 0x80) != 0);    // 符号标志：如果结果为负则设置
+
+    // 如果方向标志（DF）为 0，递增 SI 和 DI，否则递减
+    if (!cpu_get_flag(cpu, FLAG_DF)) {
+        cpu->SI += 1;
+        cpu->DI += 1;
+    } else {
+        cpu->SI -= 1;
+        cpu->DI -= 1;
+    }
+
+    printf("CMPSB executed: SI = 0x%04X, DI = 0x%04X, Left = 0x%02X, Right = 0x%02X\n", cpu->SI, cpu->DI, left, right);
 }
+
 
 void scasw(CPU *cpu) {
     uint16_t right = *(uint16_t *)&memory[cpu->DI];
@@ -691,14 +1393,17 @@ void stosb(CPU *cpu) {
     cpu->DI += 1;                            // 更新 DI
 }
 
-// 处理器控制类指令实现
+// CLC 指令 (清除进位标志)
 void clc(CPU *cpu) {
-    cpu_clear_flag(cpu, FLAG_CF); // 清除进位标志
+    cpu_clear_flag(cpu, FLAG_CF); // 清除进位标志 CF
+    printf("CLC executed: CF cleared to 0\n");
+}
+// STC 指令 (设置进位标志)
+void stc(CPU *cpu) {
+    cpu_set_flag(cpu, FLAG_CF, 1); // 设置进位标志 CF 为 1
+    printf("STC executed: CF set to 1\n");
 }
 
-void stc(CPU *cpu) {
-    cpu_set_flag(cpu, FLAG_CF, 1); // 设置进位标志
-}
 
 void cmc(CPU *cpu) {
     cpu_toggle_flag(cpu, FLAG_CF); // 反转进位标志
@@ -722,16 +1427,30 @@ void sti(CPU *cpu) {
 
 // 程序控制类指令实现
 
-void interrupt(CPU *cpu, uint8_t interrupt_number) {
-    if (cpu->SP < 4) { // 确保有足够的空间存储 IP 和 FLAGS
-        printf("Error: Stack overflow\n");
-        return;
+// 改进后的中断处理函数
+void interrupt(CPU *cpu, const char *original_instruction) {
+    uint16_t interrupt_number = 0;
+
+    // 检查指令格式并解析中断号，例如 INT 21h
+    if (sscanf(original_instruction, "INT %hx", &interrupt_number) == 1) {
+        if (cpu->SP < 4) { // 确保栈有足够的空间存储 IP 和 FLAGS
+            printf("错误：栈溢出\n");
+            return;
+        }
+
+        // 保存 IP 和 FLAGS 寄存器
+        cpu_push(cpu, cpu->IP);    // 保存 IP
+        cpu_push(cpu, cpu->FLAGS); // 保存标志寄存器
+
+        // 获取中断向量地址
+        uint16_t vector_address = memory[interrupt_number * 4] | (memory[interrupt_number * 4 + 1] << 8);
+
+        // 跳转到中断向量地址
+        cpu->IP = vector_address;
+        printf("INT %02X executed: Jumping to vector address 0x%04X\n", interrupt_number, vector_address);
+    } else {
+        printf("错误：无效的中断指令\n");
     }
-    push(cpu, cpu->IP);    // 保存 IP
-    push(cpu, cpu->FLAGS); // 保存标志寄存器
-    uint16_t vector_address = memory[interrupt_number * 4] | (memory[interrupt_number * 4 + 1] << 8);
-    cpu->IP = vector_address;
-    printf("INT %d executed: Jumping to vector address 0x%04X\n", interrupt_number, vector_address);
 }
 
 
@@ -765,55 +1484,51 @@ void loopnz(CPU *cpu) {
     }
 }
 
-// LEA 指令的实现
-void lea(CPU *cpu, uint16_t reg, uint16_t addr, AddressingMode mode) {
-    uint16_t effective_address;
+void lea(CPU *cpu, AddressingMode mode, const char *original_instruction, Variable variables[]) {
     switch (mode) {
-        case IMMEDIATE:
-            effective_address = addr; // 直接使用立即数
-            break;
-        case REGISTER:
-            // 这里假设addr是寄存器编号，实际需要从寄存器中读取地址
-            switch (addr) {
-                case 0:
-                    effective_address = cpu->AX;
-                    break;
-                case 1:
-                    effective_address = cpu->BX;
-                    break;
-                case 2:
-                    effective_address = cpu->CX;
-                    break;
-                case 3:
-                    effective_address = cpu->DX;
-                    break;
-                case 4:
-                    effective_address = cpu->SI;
-                    break;
-                case 5:
-                    effective_address = cpu->DI;
-                    break;
-                default:
-                    printf("Invalid register specified for REGISTER addressing: %d\n", addr);
-                    return;
-            }
-            break;
         case DIRECT:
-            effective_address = addr; // 使用直接地址
+        {
+            // 在这里解析 "LEA SI, Str1"
+            char register_name[10], var_name[50];
+
+            // 使用 sscanf 解析指令，获取寄存器和变量名
+            int result = sscanf(original_instruction, "LEA %9[^,], %49s", register_name, var_name);
+            if (result == 2) {
+                printf("LEA: 寄存器 = %s, 变量 = %s\n", register_name, var_name);
+
+                // 查找变量的地址
+                uint16_t var_address = 0;
+                bool var_found = false;
+
+                for (int i = 0; i < MAX_VARS; i++) {
+                    if (strcmp(variables[i].name, var_name) == 0) {
+                        var_address = variables[i].address; // 获取变量的地址
+                        var_found = true;
+                        break;
+                    }
+                }
+
+                if (var_found) {
+                    // 根据寄存器名将地址加载到相应寄存器中
+                    if (strcmp(register_name, "SI") == 0) {
+                        cpu->SI = var_address;  // 将变量地址加载到 SI 寄存器
+                        printf("LEA: SI 寄存器地址 = %04X\n", cpu->SI);
+                    } else {
+                        printf("LEA: 未知寄存器 %s\n", register_name);
+                    }
+                } else {
+                    printf("LEA: 找不到变量 %s\n", var_name);
+                }
+            } else {
+                printf("LEA: 指令格式错误\n");
+            }
+        }
             break;
-        case INDIRECT:
-            // 假设 addr 是存放地址的寄存器
-            effective_address = memory[cpu->BX]; // 使用 BX 寄存器作为指针
-            break;
-        case BASE_INDEX:
-            effective_address = cpu->BX + cpu->SI; // 基址 + 变址
-            break;
-        case RELATIVE:
-            effective_address = cpu->CS + addr; // 使用 CS 寄存器进行相对寻址
-            break;
+
+            // 可以根据需要处理其他寻址模式，如间接寻址等
         default:
-            printf("Invalid addressing mode specified for LEA.\n");
-            return;
+            printf("LEA: 不支持的寻址模式\n");
+            break;
     }
 }
 
