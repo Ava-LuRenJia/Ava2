@@ -3,23 +3,21 @@
 #include <string.h>
 #include "biu.h"
 
-// ³õÊ¼»¯CPU¼Ä´æÆ÷ºÍ±êÖ¾
+// åˆå§‹åŒ–CPUå¯„å­˜å™¨å’Œæ ‡å¿—
 void cpu_init(CPU *cpu) {
     cpu->AX = 0;
     cpu->BX = 0;
-    cpu->CX = 0;
+    cpu->CX = 100;
     cpu->DX = 0;
-    cpu->AL = 0;
-    cpu->AH = 0;
-    cpu->SP = 0;
+    cpu->SP = 0xFFFE;
     cpu->BP = 0;
     cpu->SI = 0;
     cpu->DI = 0;
     cpu->IP = 0;
-    cpu->CS = 0;
-    cpu->DS = 0;
+    cpu->CS = CODE_SEGMENT_START;
+    cpu->DS = DATA_SEGMENT_START;
     cpu->ES = 0;
-    cpu->SS = 0;
+    cpu->SS = STACK_SEGMENT_START;
     cpu->CF = 0;
     cpu->ZF = 0;
     cpu->SF = 0;
@@ -30,72 +28,72 @@ void cpu_init(CPU *cpu) {
     cpu->FLAGS = 0;
 }
 
-// ÖØÖÃËùÓÐ±êÖ¾Î»
+// é‡ç½®æ‰€æœ‰æ ‡å¿—ä½
 void cpu_reset_flags(CPU *cpu) {
     cpu->FLAGS = 0;
 }
 
-// ÉèÖÃÖ¸¶¨µÄ±êÖ¾Î»
+// è®¾ç½®æŒ‡å®šçš„æ ‡å¿—ä½
 void cpu_set_flag(CPU *cpu, uint16_t flag, int condition) {
     if (condition) {
-        cpu->FLAGS |= flag;  // ÉèÖÃ±êÖ¾
+        cpu->FLAGS |= flag;  // è®¾ç½®æ ‡å¿—
     } else {
-        cpu->FLAGS &= ~flag; // Çå³ý±êÖ¾
+        cpu->FLAGS &= ~flag; // æ¸…é™¤æ ‡å¿—
     }
 }
 
-// Çå³ýÖ¸¶¨µÄ±êÖ¾Î»
+// æ¸…é™¤æŒ‡å®šçš„æ ‡å¿—ä½
 void cpu_clear_flag(CPU *cpu, uint16_t flag) {
-    cpu->FLAGS &= ~flag; // Çå³ýÖ¸¶¨±êÖ¾Î»
+    cpu->FLAGS &= ~flag; // æ¸…é™¤æŒ‡å®šæ ‡å¿—ä½
 }
 
-// ¼ì²éÌØ¶¨±êÖ¾Î»×´Ì¬
+// æ£€æŸ¥ç‰¹å®šæ ‡å¿—ä½çŠ¶æ€
 int cpu_check_flag(const CPU *cpu, uint16_t flag) {
-    return (cpu->FLAGS & flag) ? 1 : 0; // ·µ»Ø 1 ±íÊ¾±êÖ¾Î»±»ÉèÖÃ£¬·µ»Ø 0 ±íÊ¾Î´ÉèÖÃ
+    return (cpu->FLAGS & flag) ? 1 : 0; // è¿”å›ž 1 è¡¨ç¤ºæ ‡å¿—ä½è¢«è®¾ç½®ï¼Œè¿”å›ž 0 è¡¨ç¤ºæœªè®¾ç½®
 }
 
-// ¸üÐÂËãÊõÔËËãºóµÄ±êÖ¾Î»
+// æ›´æ–°ç®—æœ¯è¿ç®—åŽçš„æ ‡å¿—ä½
 void cpu_update_flags_arithmetic(CPU *cpu, uint32_t result, uint32_t src, uint32_t dest) {
-    cpu_set_flag(cpu, FLAG_CF, result > 0xFFFF); // ¸üÐÂ CF
-    cpu_set_flag(cpu, FLAG_ZF, (uint16_t)result == 0); // ¸üÐÂ ZF
-    cpu_set_flag(cpu, FLAG_SF, (int16_t)(result & 0xFFFF) < 0); // ¸üÐÂ SF
+    cpu_set_flag(cpu, FLAG_CF, result > 0xFFFF); // æ›´æ–° CF
+    cpu_set_flag(cpu, FLAG_ZF, (uint16_t)result == 0); // æ›´æ–° ZF
+    cpu_set_flag(cpu, FLAG_SF, (int16_t)(result & 0xFFFF) < 0); // æ›´æ–° SF
 
-    // ¸üÐÂ OF
+    // æ›´æ–° OF
     cpu_set_flag(cpu, FLAG_OF,
                  ((src > 0) && (dest > 0) && (result <= 0)) ||
                  ((src < 0) && (dest < 0) && (result >= 0))
     );
 
-    // ¸üÐÂ PF£¨ÆæÅ¼±êÖ¾£©
-    uint8_t parity = __builtin_parity((uint8_t)(result & 0xFF)); // ¼ÆËã×îµÍ×Ö½ÚµÄÆæÅ¼ÐÔ
+    // æ›´æ–° PFï¼ˆå¥‡å¶æ ‡å¿—ï¼‰
+    uint8_t parity = __builtin_parity((uint8_t)(result & 0xFF)); // è®¡ç®—æœ€ä½Žå­—èŠ‚çš„å¥‡å¶æ€§
     cpu_set_flag(cpu, FLAG_PF, parity == 0);
 }
 
-// ¸üÐÂÂß¼­ÔËËãºóµÄ±êÖ¾Î»
+// æ›´æ–°é€»è¾‘è¿ç®—åŽçš„æ ‡å¿—ä½
 void cpu_update_flags_logical(CPU *cpu, uint32_t result) {
-    cpu_set_flag(cpu, FLAG_ZF, result == 0); // ¸üÐÂ ZF
-    cpu_set_flag(cpu, FLAG_PF, __builtin_parity(result & 0xFF) == 0); // ¸üÐÂ PF
+    cpu_set_flag(cpu, FLAG_ZF, result == 0); // æ›´æ–° ZF
+    cpu_set_flag(cpu, FLAG_PF, __builtin_parity(result & 0xFF) == 0); // æ›´æ–° PF
 
-    // Çå³ý SF¡¢CF¡¢OF
+    // æ¸…é™¤ SFã€CFã€OF
     cpu_clear_flag(cpu, FLAG_SF | FLAG_CF | FLAG_OF);
 }
 
-// ´òÓ¡CPU×´Ì¬£¨ÓÃÓÚµ÷ÊÔ£©
+// æ‰“å°CPUçŠ¶æ€ï¼ˆç”¨äºŽè°ƒè¯•ï¼‰
 void cpu_print_state(const CPU *cpu) {
-    printf("Í¨ÓÃ¼Ä´æÆ÷:\n");
-    printf("AX: 0x%04X  AL: 0x%02X  AH: 0x%02X\n", cpu->AX, cpu->AL, cpu->AH);
+    printf("é€šç”¨å¯„å­˜å™¨:\n");
+    printf("AX: 0x%04X\n", cpu->AX);
     printf("BX: 0x%04X  CX: 0x%04X  DX: 0x%04X\n", cpu->BX, cpu->CX, cpu->DX);
-    printf("¶ÑÕ»¼Ä´æÆ÷:\n");
+    printf("å †æ ˆå¯„å­˜å™¨:\n");
     printf("SP: 0x%04X  BP: 0x%04X\n", cpu->SP, cpu->BP);
-    printf("Ë÷Òý¼Ä´æÆ÷:\n");
+    printf("ç´¢å¼•å¯„å­˜å™¨:\n");
     printf("SI: 0x%04X  DI: 0x%04X\n", cpu->SI, cpu->DI);
-    printf("Ö¸ÁîÖ¸Õë:\n");
+    printf("æŒ‡ä»¤æŒ‡é’ˆ:\n");
     printf("IP: 0x%04X\n", cpu->IP);
-    printf("¶Î¼Ä´æÆ÷:\n");
+    printf("æ®µå¯„å­˜å™¨:\n");
     printf("CS: 0x%04X  DS: 0x%04X  ES: 0x%04X  SS: 0x%04X\n", cpu->CS, cpu->DS, cpu->ES, cpu->SS);
-    printf("±êÖ¾¼Ä´æÆ÷:\n");
+    printf("æ ‡å¿—å¯„å­˜å™¨:\n");
     printf("FLAGS: 0x%04X\n", cpu->FLAGS);
-    printf("±êÖ¾×´Ì¬:\n");
+    printf("æ ‡å¿—çŠ¶æ€:\n");
     printf("CF: %d  ZF: %d  SF: %d  OF: %d  PF: %d\n",
            cpu_check_flag(cpu, FLAG_CF),
            cpu_check_flag(cpu, FLAG_ZF),
@@ -109,36 +107,41 @@ void cpu_print_state(const CPU *cpu) {
 }
 
 
-// ·´×ªÖ¸¶¨±êÖ¾Î»
+// åè½¬æŒ‡å®šæ ‡å¿—ä½
 void cpu_toggle_flag(CPU *cpu, uint16_t flag) {
-    cpu->FLAGS ^= flag; // ·´×ªÖ¸¶¨±êÖ¾Î»
+    cpu->FLAGS ^= flag; // åè½¬æŒ‡å®šæ ‡å¿—ä½
 }
 
-// ½«ÖµÑ¹ÈëÕ»
+// å°†å€¼åŽ‹å…¥æ ˆ
 void cpu_push(CPU *cpu, uint16_t value) {
     if (cpu->SP < 2) {
-        printf("´íÎó£ºÕ»Òç³ö\n");
+        printf("é”™è¯¯ï¼šæ ˆæº¢å‡º\n");
         return;
     }
-    cpu->SP -= 2; // SP ÏòÏÂÒÆ¶¯
-    memory[cpu->SS + cpu->SP] = value; // ½«Öµ´æÈëÕ»
+    cpu->SP -= 2; // SP å‘ä¸‹ç§»åŠ¨
+    memory[cpu->SS + cpu->SP] = value & 0xFF;       // å°†ä½Žå­—èŠ‚å­˜å…¥æ ˆ
+    memory[cpu->SS + cpu->SP + 1] = (value >> 8) & 0xFF;  // å°†é«˜å­—èŠ‚å­˜å…¥æ ˆ
     printf("PUSH executed: Value = 0x%04X\n", value);
 }
 
-// ´ÓÕ»ÖÐµ¯³öÖµ
+// ä»Žæ ˆä¸­å¼¹å‡ºå€¼
 uint16_t cpu_pop(CPU *cpu) {
-    uint16_t value = memory[cpu->SS + cpu->SP]; // ´ÓÕ»ÖÐ»ñÈ¡Öµ
-    cpu->SP += 2; // SP ÏòÉÏÒÆ¶¯
+    uint16_t value = memory[cpu->SS + cpu->SP]; // ä»Žæ ˆä¸­èŽ·å–å€¼
+    cpu->SP += 2; // SP å‘ä¸Šç§»åŠ¨
     printf("POP executed: Value = 0x%04X\n", value);
     return value;
 }
 
-// Ìø×ªµ½Ö¸¶¨µØÖ·
+// è·³è½¬åˆ°æŒ‡å®šåœ°å€
 void cpu_jmp(CPU *cpu, uint16_t address) {
-    cpu->IP = address; // ¸üÐÂÖ¸ÁîÖ¸Õë
+    cpu->IP = address; // æ›´æ–°æŒ‡ä»¤æŒ‡é’ˆ
     printf("JMP executed: Address = 0x%04X\n", address);
 }
 
+// èŽ·å–ç‰¹å®šæ ‡å¿—çš„çŠ¶æ€
+bool cpu_get_flag(CPU *cpu, uint16_t flag) {
+    return (cpu->FLAGS & flag) != 0;
+}
 
 
 
