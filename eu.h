@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h> // ĞèÒª°üº¬stdint.h
+#include <stdint.h> // éœ€è¦åŒ…å«stdint.h
 #include "cpu.h"
 #include "instruction.h"
 #include "biu.h"
@@ -17,13 +17,14 @@ typedef struct {
     int count;
 } CodeSegment;
 
-extern CodeSegment code_segment; // Ê¹ÓÃ extern ÉùÃ÷
+extern CodeSegment code_segment; // ä½¿ç”¨ extern å£°æ˜
+/**(Variable(*)[100])(variables)ç”¨æ¥æŸ¥è¯¢æ•°ç»„æƒ…å†µ*/
+
+extern int var_count; // ä½¿ç”¨ extern å£°æ˜
 
 
-extern int var_count; // Ê¹ÓÃ extern ÉùÃ÷
-
-void parse_segment(const char *input, BIU *biu, CPU *cpu, Variable variables[], int *var_count);/*½âÎö´úÂë¶Î*/
-void execute_code(CPU *cpu, BIU *biu, Variable variables[], int var_count);/*Ö´ĞĞÖ¸Áî*/
+void parse_segment(const char *input, BIU *biu, CPU *cpu, Variable variables[], int *var_count);/*è§£æä»£ç æ®µ*/
+void execute_code(CPU *cpu, BIU *biu, Variable variables[], int var_count);/*æ‰§è¡ŒæŒ‡ä»¤*/
 
 #endif // EU_H
 
