@@ -1,0 +1,622 @@
+进入数据段。
+解析变量: 名称=Num1, 类型=DB, 值=5, 地址=2000
+解析变量: 名称=Num2, 类型=DW, 值=10, 地址=2001
+解析变量数组: 名称=Str1, 类型=DB, 字节数=11, 地址=2003
+解析变量数组: 名称=Str2, 类型=DB, 字节数=10, 地址=200E
+退出数据段。
+
+进入堆栈段。
+堆栈分配: 名称=STACK, 类型=DW, 数量=128
+退出堆栈段。
+
+进入代码段。
+找到 START 标签
+找到标签: START, 地址: 0x0000
+段寄存器已初始化: CS=1000, DS=2000, SS=3000
+Enqueuing instruction: MOV AX, DATA
+已入队指令: MOV AX, DATA
+Enqueuing instruction: MOV DS, AX
+已入队指令: MOV DS, AX
+Enqueuing instruction: MOV AL, 15
+已入队指令: MOV AL, 15
+Enqueuing instruction: MOV [Num1], AL
+已入队指令: MOV [Num1], AL
+Enqueuing instruction: MOV BX, Num2
+已入队指令: MOV BX, Num2
+Enqueuing instruction: MOV CX, [BX]
+已入队指令: MOV CX, [BX]
+Enqueuing instruction: LEA SI, Str1
+已入队指令: LEA SI, Str1
+Enqueuing instruction: PUSH CX
+已入队指令: PUSH CX
+Enqueuing instruction: POP DX
+已入队指令: POP DX
+Enqueuing instruction: ADD AL, 3
+已入队指令: ADD AL, 3
+Enqueuing instruction: SUB AL, 2
+已入队指令: SUB AL, 2
+Enqueuing instruction: AND AL, 0Fh
+已入队指令: AND AL, 0Fh
+Enqueuing instruction: OR AL, 01h
+已入队指令: OR AL, 01h
+Enqueuing instruction: XOR AL, 02h
+已入队指令: XOR AL, 02h
+Enqueuing instruction: NOT AL
+已入队指令: NOT AL
+Enqueuing instruction: MOV SI, OFFSETStr1
+已入队指令: MOV SI, OFFSETStr1
+Enqueuing instruction: MOV DI, OFFSETStr2
+已入队指令: MOV DI, OFFSETStr2
+Enqueuing instruction: MOVSB
+已入队指令: MOVSB
+Enqueuing instruction: INC SI
+已入队指令: INC SI
+Enqueuing instruction: INC DI
+已入队指令: INC DI
+Enqueuing instruction: CMPSB
+已入队指令: CMPSB
+Enqueuing instruction: STC
+已入队指令: STC
+Enqueuing instruction: CLC
+已入队指令: CLC
+Enqueuing instruction: JMP START
+已入队指令: JMP START
+Enqueuing instruction: MOV AH, 4Ch
+已入队指令: MOV AH, 4Ch
+Enqueuing instruction: INT 21h
+已入队指令: INT 21h
+退出代码段。
+开始执行指令...
+--------------------------------------------------------
+Dequeued instruction: MOV AX, DATA
+处理指令: MOV AX, DATA
+MOV指令解析失败: MOV AX, DATA
+通用寄存器:
+AX: 0x0000
+BX: 0x0000  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DS, AX
+处理指令: MOV DS, AX
+通用寄存器:
+AX: 0x0000
+BX: 0x0000  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0002
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 15
+处理指令: MOV AL, 15
+通用寄存器:
+AX: 0x000F
+BX: 0x0000  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0005
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV [Num1], AL
+处理指令: MOV [Num1], AL
+直接寻址: 写入内存[0x000F] = 0x000F
+通用寄存器:
+AX: 0x000F
+BX: 0x0000  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0008
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV BX, Num2
+处理指令: MOV BX, Num2
+通用寄存器:
+AX: 0x000F
+BX: 0x000A  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x000B
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV CX, [BX]
+处理指令: MOV CX, [BX]
+寄存器间接寻址: 写入内存[0x000A] = 0x64
+通用寄存器:
+AX: 0x000F
+BX: 0x000A  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x000D
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: LEA SI, Str1
+处理指令: LEA SI, Str1
+LEA 指令: dest=SI, src=Str1
+LEA: 寄存器 = SI, 变量 = Str1
+LEA: SI 寄存器地址 = 2003
+通用寄存器:
+AX: 0x000F
+BX: 0x000A  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x000D
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: PUSH CX
+压入值: 0x0064
+PUSH executed: Value = 0x0064, SP = 0xFFFC
+通用寄存器:
+AX: 0x000F
+BX: 0x000A  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFC  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x000E
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: POP DX
+POP executed: Value = 0x0064, SP = 0xFFFE
+弹出值: 0x0064
+通用寄存器:
+AX: 0x000F
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x000F
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: ADD AL, 3
+处理指令: ADD AL, 3
+Destination: AL, dest = 0x0F
+Source: Immediate, src = 0x0003
+ADD executed: Result = 0x0012
+通用寄存器:
+AX: 0x0012
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x0012
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0010
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 1
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: SUB AL, 2
+处理指令: SUB AL, 2
+Destination: AL, dest = 0x12
+Source: Immediate, src = 0x0002
+SUB executed: Result = 0x0010
+通用寄存器:
+AX: 0x0010
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x0015
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0001
+标志状态:
+CF: 1  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: AND AL, 0Fh
+处理指令: AND AL, 0Fh
+Destination: AL, dest = 0x10
+Source: Immediate, src = 0x000F
+AND executed: Result = 0x0000
+通用寄存器:
+AX: 0x0000
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x0018
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0012
+标志状态:
+CF: 0  ZF: 1  SF: 0  OF: 0  PF: 1
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: OR AL, 01h
+处理指令: OR AL, 01h
+Destination: AL, dest = 0x00
+Source: Immediate, src = 0x0001
+OR executed: Result = 0x0001
+通用寄存器:
+AX: 0x0001
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x001B
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: XOR AL, 02h
+处理指令: XOR AL, 02h
+Destination: AL, dest = 0x01
+Source: Immediate, src = 0x0002
+XOR executed: Result = 0x0003
+通用寄存器:
+AX: 0x0003
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x001E
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0010
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 1
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: NOT AL
+Operand: AL, operand = 0x03
+NOT executed: Result = 0xFFFC
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x2003  DI: 0x0000
+指令指针:
+IP: 0x001E
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0010
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 1
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV SI, OFFSETStr1
+处理指令: MOV SI, OFFSETStr1
+直接寻址: 写入内存[0xEC02] = 0xEC02
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC02  DI: 0x0000
+指令指针:
+IP: 0x0021
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0010
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 1
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV DI, OFFSETStr2
+处理指令: MOV DI, OFFSETStr2
+直接寻址: 写入内存[0xEE3E] = 0xEE3E
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC02  DI: 0xEE3E
+指令指针:
+IP: 0x0024
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0010
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 1
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOVSB
+MOVSB executed: Src = 0xEC02, Dest = 0xEE3E
+Value moved: 0x00
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC03  DI: 0xEE3F
+指令指针:
+IP: 0x0024
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0010
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 1
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: INC SI
+INC executed: SI = 0xEC04
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC04  DI: 0xEE3F
+指令指针:
+IP: 0x0024
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0004
+标志状态:
+CF: 0  ZF: 0  SF: 1  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: INC DI
+INC executed: DI = 0xEE40
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC04  DI: 0xEE40
+指令指针:
+IP: 0x0024
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0004
+标志状态:
+CF: 0  ZF: 0  SF: 1  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: CMPSB
+CMPSB executed: SI = 0xEC05, DI = 0xEE41, Left = 0x00, Right = 0x00
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC05  DI: 0xEE41
+指令指针:
+IP: 0x0024
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0002
+标志状态:
+CF: 0  ZF: 1  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: STC
+STC executed: CF set to 1
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC05  DI: 0xEE41
+指令指针:
+IP: 0x0024
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0003
+标志状态:
+CF: 1  ZF: 1  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: CLC
+CLC executed: CF cleared to 0
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC05  DI: 0xEE41
+指令指针:
+IP: 0x0024
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0002
+标志状态:
+CF: 0  ZF: 1  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: JMP START
+JMP executed: IP changed from 0x0024 to 0x0000 (Jumping to label START)
+通用寄存器:
+AX: 0x00FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC05  DI: 0xEE41
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0002
+标志状态:
+CF: 0  ZF: 1  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV AH, 4Ch
+处理指令: MOV AH, 4Ch
+通用寄存器:
+AX: 0x04FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0xEC05  DI: 0xEE41
+指令指针:
+IP: 0x0003
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0002
+标志状态:
+CF: 0  ZF: 1  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: INT 21h
+PUSH executed: Value = 0x0003
+PUSH executed: Value = 0x0002
+INT 21 executed: Jumping to vector address 0x0000
+通用寄存器:
+AX: 0x04FC
+BX: 0x000A  CX: 0x0064  DX: 0x0064
+堆栈寄存器:
+SP: 0xFFFA  BP: 0x0000
+索引寄存器:
+SI: 0xEC05  DI: 0xEE41
+指令指针:
+IP: 0x0000
+段寄存器:
+CS: 0x1000  DS: 0x0000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0002
+标志状态:
+CF: 0  ZF: 1  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+程序执行完毕。
+
+进程已结束，退出代码为 0
