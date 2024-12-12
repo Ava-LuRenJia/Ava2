@@ -1,0 +1,89 @@
+请输入汇编指令，每行一条，输入 'END START' 结束输入（输入AH代表自动选择高地址，AL代表自动选择低地址）:
+DATA SEGMENT
+DATA ENDS
+
+STACK SEGMENT STACK
+STACK ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA, SS:STACK
+START:
+  MOV AL, 10
+  MOV BL, 5
+CODE ENDS
+END START
+进入数据段。
+退出数据段。
+
+进入堆栈段。
+退出堆栈段。
+
+进入代码段。
+找到 START 标签
+找到标签: START, 地址: 0x0000
+段寄存器已初始化: CS=1000, DS=2000, SS=3000
+Enqueuing instruction: MOV AL, 10
+已入队指令: MOV AL, 10
+Enqueuing instruction: MOV BL, 5
+已入队指令: MOV BL, 5
+退出代码段。
+开始执行指令...
+--------------------------------------------------------
+Dequeued instruction: MOV AL, 10
+处理指令: MOV AL, 10
+错误: 无效的寄存器名称。
+通用寄存器:
+AX: 0x000A
+BX: 0x0000  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0003
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+Dequeued instruction: MOV BL, 5
+处理指令: MOV BL, 5
+通用寄存器:
+AX: 0x000A
+BX: 0x0005  CX: 0x0064  DX: 0x0000
+堆栈寄存器:
+SP: 0xFFFE  BP: 0x0000
+索引寄存器:
+SI: 0x0000  DI: 0x0000
+指令指针:
+IP: 0x0006
+段寄存器:
+CS: 0x1000  DS: 0x2000  ES: 0x0000  SS: 0x3000
+标志寄存器:
+FLAGS: 0x0000
+标志状态:
+CF: 0  ZF: 0  SF: 0  OF: 0  PF: 0
+DF: 0  IF: 0
+--------------------------------------------------------
+--------------------------------------------------------
+处理指令: MOV AL, 10
+DEBUG: 写入 PORT_A 值: 10
+控制 低地址芯片的PORT_A: 写入 10
+处理指令: MOV BL, 5
+DEBUG: 写入 PORT_B 值: 5
+控制 低地址芯片的PORT_B: 写入 5
+请输入小灯状态，1代表打开，0代表关闭:
+1
+DEBUG: Inside chip8255_read, chip->cs = 1, chip->rd = 1
+DEBUG: 读取 PORT_A 值: 10
+DEBUG: Inside chip8255_read, chip->cs = 1, chip->rd = 1
+DEBUG: 读取 PORT_B 值: 5
+当前是低地址芯片
+灯无法打开，小于阈值20，当前光强: 15
+程序执行完毕。
+
+进程已结束，退出代码为 0
