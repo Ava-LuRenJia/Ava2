@@ -1,183 +1,159 @@
 #include <stdio.h>
 #include <string.h>
+#include "chip8255.h"
 #include "cpu.h"
 #include "biu.h"
-#include "eu.h"
-#include "Chip2164.h"
+#include "eu.h" // 包含 eu.h 头文件
 
-#define MAX_VARIABLES 100 // 定义最大变量数量
 #define MAX_INPUT_SIZE 1024 // 定义输入大小
+#define MAX_INSTRUCTION_COUNT 100
 
-int main() {
-    CPU cpu;
-    BIU biu;
-    Variable variables[MAX_VARIABLES]; // 变量数组
+// 定义指令结构
+typedef struct {
+    char instruction[50]; // 存储指令（如 MOV AL, 10）
+} AssemblyInstruction;
 
-    cpu_init(&cpu);
-    init_biu(&biu);
+// 模拟汇编指令执行的函数
+void simulate_assembly(Chip8255 *chip1, Chip8255 *chip2,CPU *cpu, BIU *biu, Variable variables[], int var_count) {
+    printf("请输入汇编指令，每行一条，输入 'END START' 结束输入（输入AH代表自动选择高地址，AL代表自动选择低地址）:\n");
 
-    printf("请输入汇编指令，每行一条，输入 'END START' 结束输入:\n");
-
-    char input[MAX_INPUT_SIZE] = {0};
-    char temp[50];
+    char input[MAX_INPUT_SIZE] = {0};  // 存储汇编指令
+    char temp[50];  // 临时存储输入的一行指令
+    AssemblyInstruction instructions[MAX_INSTRUCTION_COUNT];
+    int sum = 0;
 
     // 收集所有输入指令
     while (1) {
-        fgets(temp, sizeof(temp), stdin);
-        temp[strcspn(temp, "\n")] = '\0'; // 移除换行符
-
-        // 检查结束标志
-        if (strcmp(temp, "END START") == 0) {
+        // 使用 fgets 读取一行输入
+        if (fgets(temp, sizeof(temp), stdin) == NULL) {
             break;
         }
-        if (strlen(temp) == 0) {
+
+        // 去除换行符
+        temp[strcspn(temp, "\n")] = '\0'; // 移除换行符
+
+        // 去除前后的空格
+        char *start = temp;
+        while (*start == ' ' || *start == '\t') {
+            start++;  // 跳过前导空格
+        }
+
+        char *end = start + strlen(start) - 1;
+        while (end > start && (*end == ' ' || *end == '\t')) {
+            end--;  // 跳过尾部空格
+        }
+        *(end + 1) = '\0';  // 终止符添加在尾部
+
+        // 检查结束标志
+        if (strcmp(start, "END START") == 0) {
+            break;
+        }
+        if (strlen(start) == 0) {
             continue; // 跳过空行
         }
 
         // 确保不会超出输入大小
-        if (strlen(input) + strlen(temp) + 2 < MAX_INPUT_SIZE) {
-            snprintf(input + strlen(input), sizeof(input) - strlen(input), "%s\n", temp);
+        if (strlen(input) + strlen(start) + 2 < MAX_INPUT_SIZE) {
+            snprintf(input + strlen(input), sizeof(input) - strlen(input), "%s\n", start);
         } else {
             printf("输入过长，无法继续。\n");
             break;
         }
+
+        // 检查 MOV 指令
+        if (strncmp(start, "MOV", 3) == 0) {
+            char reg[3]; // 存储寄存器名
+            int data;
+
+            // 使用 sscanf 解析 MOV 指令后的寄存器和数据
+            if (sscanf(start + 4, "%2s, %d", reg, &data) == 2) {
+                // 如果解析成功（即找到有效的寄存器和数据）
+                strcpy(instructions[sum].instruction, start);  // 存储指令
+                sum++;  // 增加指令计数
+            }
+        }
     }
 
-    // 调用 parse_segment 解析输入的汇编代码
-    parse_segment(input, &biu, &cpu, variables, &var_count);
+    parse_segment(input, biu, cpu, variables, &var_count);
+    execute_code(cpu, biu, variables, var_count);
 
-    // 执行队列中所有指令
-    execute_code(&cpu, &biu, variables, var_count);
+    // 处理 PORT_A 和 PORT_B 的指令
+// 修改 simulate_assembly 中处理 MOV 指令部分
+    for (int i = 0; i < sum; i++) {
+        printf("处理指令: %s\n", instructions[i].instruction);
 
+        if (strncmp(instructions[i].instruction, "MOV", 3) == 0) {
+            char reg[3];
+            int data;
+            sscanf(instructions[i].instruction + 4, "%2s, %d", reg, &data);
+
+            if (strcmp(reg, "AH") == 0) {
+                chip2->wr = true;  // 写操作
+                chip2->cs = 0000;
+                chip8255_write(chip2, PORT_A, (uint8_t)data);
+                printf("控制 高地址芯片的PORT_A: 写入 %d\n", data);
+                chip2->wr = false;  // 写操作
+            } else if (strcmp(reg, "BH") == 0) {
+                chip2->wr = true;  // 写操作
+                chip2->cs = 0000;
+                chip8255_write(chip2, PORT_B, (uint8_t)data);
+                printf("控制 高地址芯片的PORT_B: 写入 %d\n", data);
+                chip2->wr = false;  // 写操作
+            }
+
+            if (strcmp(reg, "AL") == 0) {
+                chip1->wr = true;  // 写操作
+                chip1->cs = 0001;
+                chip8255_write(chip1, PORT_A, (uint8_t)data);
+                printf("控制 低地址芯片的PORT_A: 写入 %d\n", data);
+                chip1->wr = false;  // 写操作
+            } else if (strcmp(reg, "BL") == 0) {
+                chip1->wr = true;  // 写操作
+                chip1->cs = 0001;
+                chip8255_write(chip1, PORT_B, (uint8_t)data);
+                printf("控制 低地址芯片的PORT_B: 写入 %d\n", data);
+                chip1->wr = false;  // 写操作
+            }
+
+        }
+    }
+    printf("请输入小灯状态，1代表打开，0代表关闭: \n");
+    int light_on;
+    scanf("%d", &light_on);
+
+if(light_on == 0){
+        printf("灯已关闭\n");
+    }
+if(chip1->cs == 0001 && light_on == 1) {
+    chip1->rd = true;  // 读操作
+    int light_intensity_low = chip8255_read(chip1, PORT_A) + chip8255_read(chip1, PORT_B);
+    printf("当前是低地址芯片\n");
+    printf("灯已打开，当前光强: %d\n", light_intensity_low);
+    chip1->rd = false;  // 读操作
+}
+if (chip2->cs == 0000 && light_on == 1) {
+        chip2->rd = true;  // 读操作
+        int light_intensity_high = chip8255_read(chip2, PORT_A) + chip8255_read(chip2, PORT_B);
+        printf("当前是高地址芯片\n");
+        printf("灯已打开，当前光强: %d\n", light_intensity_high);
+        chip2->rd = false;  // 读操作
+    }
     printf("程序执行完毕。\n");
-
-    return 0;
 }
 
-
-
-
-
-//以下主函数是测试Chip2164.c能不能正常运行
-/*
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include "Chip2164.h"
-
-#define MEMORY_SIZE 65536 // 64K x 1 位的存储容量
-
+// 主函数
 int main() {
-    Memory2164 memory;
-    initMemory2164(&memory);
-
-    // 写入数据示例
-    uint16_t address_to_write = 0x01A0; // 要写入的地址
-    uint8_t data_to_write = 0xFF;        // 要写入的数据
-    write_2164(&memory, address_to_write, data_to_write);
-    printf("已写入数据: %02X 到地址: %04X\n", data_to_write, address_to_write);
-
-    // 读取数据示例
-    uint16_t address_to_read = 0x01A0; // 要读取的地址
-    uint8_t read_data_value = read_2164(&memory, address_to_read);
-    printf("从地址: %04X 读取到数据: %02X\n", address_to_read, read_data_value);
-
-    // 尝试读取一个未写入过的地址
-    uint16_t new_address_to_read = 0x01A1; // 要读取的地址
-    uint8_t new_read_data_value = read_2164(&memory, new_address_to_read);
-    printf("从地址: %04X 读取到数据: %02X\n", new_address_to_read, new_read_data_value);
-
-    return 0;
-}
-*/
-
-
-/*
-#include <stdio.h>
-#include <string.h>
-#include "cpu.h"
-#include "biu.h"
-#include "eu.h"
-#include "Chip2164.h"
-#include "test5.h"
-
-#define MAX_VARIABLES 100
-#define MAX_INPUT_SIZE 2048
-
-int main() {
-    CPU cpu;
-    BIU biu;
-    Memory2164 memory;
-    Variable variables[MAX_VARIABLES];
+    Chip8255 chip1;
+    Chip8255 chip2;
+    CPU cpu = {0};
+    BIU biu = {0};
+    chip8255_init(&chip1);
+    chip8255_init(&chip2);
+    Variable variables[100];
     int var_count = 0;
 
-    cpu_init(&cpu);
-    init_biu(&biu);
-    initMemory2164(&memory);
-
-    printf("请输入汇编指令，每行一条，输入 'END START' 结束输入:\n");
-
-    char input[MAX_INPUT_SIZE] = {0};
-    char temp[50];
-
-    while (1) {
-        fgets(temp, sizeof(temp), stdin);
-        temp[strcspn(temp, "\n")] = '\0';
-
-        if (strcmp(temp, "END START") == 0) {
-            break;
-        }
-        if (strlen(temp) == 0) {
-            continue;
-        }
-
-        if (strlen(input) + strlen(temp) + 2 < MAX_INPUT_SIZE) {
-            snprintf(input + strlen(input), sizeof(input) - strlen(input), "%s\n", temp);
-        } else {
-            printf("输入过长，无法继续。\n");
-            break;
-        }
-    }
-
-    parse_segment(input, &biu, &cpu, variables, &var_count);
-
-    printf("开始执行指令...\n");
-    printf("--------------------------------------------------------\n");
-    char instruction[50];
-    int instruction_count = 0;
-
-    // 执行指令队列
-    while (dequeue_instruction(&biu, instruction)) {
-        if (strstr(instruction, "READ") != NULL) {
-            uint16_t address = 0;
-            if (sscanf(instruction, "READ %hu", &address) == 1) {
-                // 地址总线发送到 2164，并经过地址译码后传输给行地址和列地址
-                uint8_t data = read_2164(&memory, address);
-                printf("读取数据: %02X\n", data);
-            } else {
-                printf("READ指令格式错误: %s\n", instruction);
-            }
-        } else if (strstr(instruction, "WRITE") != NULL) {
-            uint16_t address = 0;
-            uint8_t data = 0;
-            if (sscanf(instruction, "WRITE %hu %hhu", &address, &data) == 2) {
-                // 地址总线发送到 2164，并经过地址译码后传输给行地址和列地址
-                write_2164(&memory, address, data);
-                printf("写入数据: %02X 到地址 %04X\n", data, address);
-            } else {
-                printf("WRITE指令格式错误: %s\n", instruction);
-            }
-        } else {
-            // 处理其他指令
-            execute_code(&cpu, &biu, variables, var_count);
-        }
-
-        printf("已执行指令: %s\n", instruction);
-        instruction_count++;
-    }
-
-    printf("总共执行了 %d 条指令\n", instruction_count);
+    simulate_assembly(&chip1, &chip2,&cpu, &biu, variables, var_count);
 
     return 0;
-}*/
+}
+
