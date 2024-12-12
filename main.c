@@ -128,15 +128,21 @@ if(chip1->cs == 0001 && light_on == 1) {
     chip1->rd = true;  // 读操作
     int light_intensity_low = chip8255_read(chip1, PORT_A) + chip8255_read(chip1, PORT_B);
     printf("当前是低地址芯片\n");
-    printf("灯已打开，当前光强: %d\n", light_intensity_low);
+    if(light_intensity_low < 20){
+        printf("灯无法打开，小于阈值20，当前光强: %d\n", light_intensity_low);
+    }
+    else{ printf("灯已打开，当前光强: %d\n", light_intensity_low);}
     chip1->rd = false;  // 读操作
 }
 if (chip2->cs == 0000 && light_on == 1) {
         chip2->rd = true;  // 读操作
         int light_intensity_high = chip8255_read(chip2, PORT_A) + chip8255_read(chip2, PORT_B);
         printf("当前是高地址芯片\n");
-        printf("灯已打开，当前光强: %d\n", light_intensity_high);
-        chip2->rd = false;  // 读操作
+    if(light_intensity_high < 20){
+        printf("灯无法打开，小于阈值20，当前光强: %d\n", light_intensity_high);
+    } else{
+      printf("灯已打开，当前光强: %d\n", light_intensity_high);}
+     chip2->rd = false;  // 读操作
     }
     printf("程序执行完毕。\n");
 }
@@ -145,8 +151,10 @@ if (chip2->cs == 0000 && light_on == 1) {
 int main() {
     Chip8255 chip1;
     Chip8255 chip2;
-    CPU cpu = {0};
-    BIU biu = {0};
+    CPU cpu;
+    BIU biu;
+    cpu_init(&cpu);
+    init_biu(&biu);
     chip8255_init(&chip1);
     chip8255_init(&chip2);
     Variable variables[100];
