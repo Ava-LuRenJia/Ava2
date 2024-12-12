@@ -856,7 +856,11 @@ void mov(CPU *cpu, uint16_t *dest, uint16_t src, AddressingMode mode, const char
                     cpu->AX = (uint16_t)src;  // 将立即数存入 AX
                 } else if (strstr(instruction, "BX")) {
                     cpu->BX = (uint16_t)src;  // 将立即数存入 BX
-                } else if (strstr(instruction, "CX")) {
+                }if (strstr(instruction, "BL")) {
+                    cpu->BX = (cpu->BX & 0xFF00) | (src & 0xFF);  // 仅更新 AX 的低8位 (AL)
+                } else if (strstr(instruction, "BH")) {
+                    cpu->BX = (cpu->BX & 0x00FF) | ((src & 0xFF) << 8);  // 仅更新 AX 的高8位 (AH)
+                }else if (strstr(instruction, "CX")) {
                     cpu->CX = (uint16_t)src;  // 将立即数存入 CX
                 } else if (strstr(instruction, "DX")) {
                     cpu->DX = (uint16_t)src;  // 将立即数存入 DX
